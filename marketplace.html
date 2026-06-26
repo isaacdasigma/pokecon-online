@@ -69,7 +69,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 380px;
+            min-height: 480px;
         }
         .booth-card:hover {
             transform: translateY(-5px);
@@ -111,13 +111,13 @@
             align-self: flex-start;
         }
         
-        /* 📹 WEBCAM STREAM WINDOW */
+        /* 📹 STREAM LAYOUT */
         .webcam-box {
             width: 100%;
-            height: 160px;
+            height: 140px;
             background: #000;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             overflow: hidden;
             position: relative;
         }
@@ -126,11 +126,31 @@
             height: 100%;
             object-fit: cover;
         }
-        .webcam-error {
-            color: #ffcb05;
-            font-size: 12px;
-            text-align: center;
-            padding: 40px 10px 0 10px;
+        
+        /* 📸 CARD/PACK SHOWCASE IMAGE */
+        .showcase-box {
+            width: 100%;
+            height: 120px;
+            background: #e9e9f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .showcase-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .showcase-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #757575;
+            margin-bottom: 4px;
+            display: block;
         }
 
         .btn {
@@ -170,7 +190,7 @@
             align-items: center; 
             padding: 30px;
             border-radius: 12px;
-            min-height: 380px;
+            min-height: 480px;
             box-sizing: border-box;
         }
 
@@ -196,12 +216,14 @@
         }
         .modal-content {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
             width: 90%;
             max-width: 400px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             border: 4px solid #ffcb05;
+            max-height: 85vh;
+            overflow-y: auto;
         }
         .modal-content h3 {
             font-family: 'Montserrat', sans-serif;
@@ -210,7 +232,7 @@
             text-transform: uppercase;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .form-group label {
             display: block;
@@ -220,16 +242,11 @@
         }
         .form-group input, .form-group select {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 2px solid #ccc;
             border-radius: 6px;
             box-sizing: border-box;
             font-family: inherit;
-        }
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
         }
 
         footer {
@@ -281,7 +298,7 @@
             </div>
             <div class="form-group">
                 <label for="description">What are you doing/selling?</label>
-                <input type="text" id="description" placeholder="e.g., Showing off vintage pack breaks!">
+                <input type="text" id="description" placeholder="e.g., Pulling heavy hitters!">
             </div>
             <div class="form-group">
                 <label for="specialty">Choose Category Tag</label>
@@ -291,6 +308,10 @@
                     <option value="🎯 Japanese Sets">Japanese Sets</option>
                     <option value="🎨 Custom Art/Pins">Custom Art/Pins</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label for="boothImage">📸 Upload Pack or Card Image</label>
+                <input type="file" id="boothImage" accept="image/*">
             </div>
             <div class="modal-actions">
                 <button class="btn btn-blue" onclick="closeRentalForm()">Cancel</button>
@@ -306,7 +327,7 @@
     <script>
         let targetedBoothId = '';
         const ONE_HOUR = 60 * 60 * 1000;
-        let activeStreams = {}; // Holds reference to webcam tracks to close them later
+        let activeStreams = {};
 
         document.addEventListener("DOMContentLoaded", () => {
             for(let i = 1; i <= 4; i++) {
@@ -327,7 +348,7 @@
                     renderEmptyBooth(container, id);
                 } else {
                     renderOccupiedBooth(container, id, booth);
-                    startWebcam(id); // Fire up webcam stream immediately for the active card
+                    startWebcam(id);
                 }
             } else {
                 renderEmptyBooth(container, id);
@@ -346,6 +367,11 @@
         }
 
         function renderOccupiedBooth(container, id, booth) {
+            // Check if there's a custom uploaded image, otherwise use a placeholder
+            const cardImgHtml = booth.image 
+                ? `<img src="${booth.image}" alt="Showcase Items">` 
+                : `<p style="color: #999; font-size: 12px; margin: 45px 0 0 0;">No picture uploaded</p>`;
+
             container.innerHTML = `
                 <div class="booth-card">
                     <div>
@@ -355,6 +381,11 @@
                         
                         <div class="webcam-box">
                             <video id="video-${id}" autoplay playsinline muted></video>
+                        </div>
+
+                        <span class="showcase-label">🔥 Card/Pack Featured Showcase:</span>
+                        <div class="showcase-box">
+                            ${cardImgHtml}
                         </div>
 
                         <p style="font-size: 14px; margin: 0 0 10px 0;">${booth.description}</p>
@@ -368,21 +399,16 @@
             `;
         }
 
-        // 🎥 WEBCAM ACTIVATION LOGIC
         async function startWebcam(id) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 const videoElement = document.getElementById(`video-${id}`);
                 if (videoElement) {
                     videoElement.srcObject = stream;
-                    activeStreams[id] = stream; // Store track references
+                    activeStreams[id] = stream;
                 }
             } catch (err) {
-                console.error("Camera access denied or unavailable", err);
-                const videoBox = document.querySelector(`#video-${id}`)?.parentElement;
-                if (videoBox) {
-                    videoBox.innerHTML = `<div class="webcam-error">⚠️ Webcam permission required to stream cards live!</div>`;
-                }
+                console.error("Camera unavailable", err);
             }
         }
 
@@ -400,21 +426,35 @@
             const trainerName = document.getElementById('trainerName').value || "Trainer_Unknown";
             const description = document.getElementById('description').value || "Welcome to my con booth!";
             const specialty = document.getElementById('specialty').value;
+            const fileInput = document.getElementById('boothImage');
             const timestamp = new Date().getTime();
 
-            const boothData = { shopName, trainerName, description, specialty, timestamp };
-            localStorage.setItem(targetedBoothId, JSON.stringify(boothData));
+            const processAndSave = (imgBase64 = null) => {
+                const boothData = { shopName, trainerName, description, specialty, timestamp, image: imgBase64 };
+                localStorage.setItem(targetedBoothId, JSON.stringify(boothData));
+                renderBooth(targetedBoothId);
+                
+                // Clear out values
+                document.getElementById('shopName').value = '';
+                document.getElementById('trainerName').value = '';
+                document.getElementById('description').value = '';
+                fileInput.value = '';
+                closeRentalForm();
+            };
 
-            renderBooth(targetedBoothId);
-
-            document.getElementById('shopName').value = '';
-            document.getElementById('trainerName').value = '';
-            document.getElementById('description').value = '';
-            closeRentalForm();
+            // Read the image file if it exists, convert it to an format localStorage can hold
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    processAndSave(e.target.result);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                processAndSave();
+            }
         }
 
         function kickOut(id) {
-            // Turn off camera tracks before destroying element
             if (activeStreams[id]) {
                 activeStreams[id].getTracks().forEach(track => track.stop());
                 delete activeStreams[id];
