@@ -331,6 +331,37 @@
         </div>
     </div>
 
+    <div id="securityModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:#1a1f32; border:2px solid #2a75d3; color:white; padding:30px; border-radius:15px; width:90%; max-width:400px; font-family:'Outfit', sans-serif;">
+            
+            <div id="authSignupStep">
+                <h3 style="margin-top:0; color:#ffcb05; font-family:'Montserrat';">🔐 Verified Renter Registration</h3>
+                <p style="font-size:13px; color:#a0a7c4;">To prevent anonymous scams, you must link a valid email address before hosting a public booth.</p>
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; font-size:12px; margin-bottom:5px;">Email Address</label>
+                    <input type="email" id="secureEmail" placeholder="trainer@pallettown.com" style="width:100%; padding:10px; background:#0f121d; border:1px solid rgba(255,255,255,0.1); color:white; border-radius:6px; box-sizing:border-box;">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; font-size:12px; margin-bottom:5px;">Password</label>
+                    <input type="password" id="securePassword" placeholder="••••••••" style="width:100%; padding:10px; background:#0f121d; border:1px solid rgba(255,255,255,0.1); color:white; border-radius:6px; box-sizing:border-box;">
+                </div>
+                <button onclick="submitBackendSignup()" style="width:100%; background:#2a75d3; color:white; border:none; padding:12px; font-weight:bold; border-radius:6px; cursor:pointer; text-transform:uppercase;">Send Verification Code</button>
+                <button onclick="closeSecurityGate()" style="width:100%; background:transparent; color:#a0a7c4; border:none; margin-top:10px; cursor:pointer;">Cancel</button>
+            </div>
+
+            <div id="authVerifyStep" style="display:none;">
+                <h3 style="margin-top:0; color:#e3350d; font-family:'Montserrat';">📧 Check Your Inbox!</h3>
+                <p style="font-size:13px; color:#a0a7c4;">A 6-digit security token was dispatched. Enter it below to unlock your seller profile privileges.</p>
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; font-size:12px; margin-bottom:5px;">6-Digit Token</label>
+                    <input type="text" id="secureToken" placeholder="123456" maxlength="6" style="width:100%; padding:10px; background:#0f121d; border:1px solid rgba(255,255,255,0.1); color:white; border-radius:6px; box-sizing:border-box; text-align:center; font-size:18px; letter-spacing:4px;">
+                </div>
+                <button onclick="submitBackendVerification()" style="width:100%; background:#e3350d; color:white; border:none; padding:12px; font-weight:bold; border-radius:6px; cursor:pointer; text-transform:uppercase;">Verify & Unlock Booth</button>
+            </div>
+
+        </div>
+    </div>
+
     <footer>
         <p>&copy; 2026 PokéCon Online Concept</p>
     </footer>
@@ -339,6 +370,10 @@
         let targetedBoothId = '';
         const ONE_HOUR = 60 * 60 * 1000;
         let activeStreams = {};
+        
+        const BACKEND_URL = "https://v3gn6z-8080.csb.app"; // 🌟 Matches your running CodeSandbox exactly
+        let targetBoothIdToRent = null;
+        let confirmedUserEmail = "";
 
         document.addEventListener("DOMContentLoaded", () => {
             for(let i = 1; i <= 4; i++) {
@@ -374,7 +409,7 @@
                 <div class="rent-booth">
                     <h4 style="color: #757575; margin: 0 0 10px 0;">Booth #0${number}</h4>
                     <p style="font-size: 14px; color: #888; margin: 0 0 15px 0;">Available for rent.</p>
-                    <button class="btn" style="background-color: #e3350d; color: white;" onclick="openRentalForm('${id}')">Rent Here</button>
+                    <button class="btn" style="background-color: #e3350d; color: white;" onclick="openSecurityGate('${id}')">Rent Here</button>
                 </div>
             `;
         }
@@ -497,79 +532,75 @@
             localStorage.removeItem(id);
             renderBooth(id);
         }
-        const BACKEND_URL = "https://v3gn6z-8080.csb.app"; // 🌟 Matches your running CodeSandbox exactly
-let targetBoothIdToRent = null;
-let confirmedUserEmail = "";
 
-// Intercept the original "Rent Booth" button action
-function openSecurityGate(boothId) {
-    targetBoothIdToRent = boothId;
-    document.getElementById("securityModal").style.display = "flex";
-    document.getElementById("authSignupStep").style.display = "block";
-    document.getElementById("authVerifyStep").style.display = "none";
-}
-
-function closeSecurityGate() {
-    document.getElementById("securityModal").style.display = "none";
-}
-
-// 📤 Post signup details directly to your live CodeSandbox backend server
-function submitBackendSignup() {
-    const email = document.getElementById("secureEmail").value.trim();
-    const password = document.getElementById("securePassword").value;
-
-    if (!email || !password) {
-        alert("Please fill out all mandatory registration rows.");
-        return;
-    }
-
-    fetch(`${BACKEND_URL}/api/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            confirmedUserEmail = email;
-            // Advance to the 6-digit verification code screen phase layout
-            document.getElementById("authSignupStep").style.display = "none";
-            document.getElementById("authVerifyStep").style.display = "block";
-            alert("Account initialized! Look at your dark green CodeSandbox console log to grab your verification code key.");
-        } else {
-            alert("Error: " + data.message);
+        // Intercept the original "Rent Booth" button action
+        function openSecurityGate(boothId) {
+            targetBoothIdToRent = boothId;
+            document.getElementById("securityModal").style.display = "flex";
+            document.getElementById("authSignupStep").style.display = "block";
+            document.getElementById("authVerifyStep").style.display = "none";
         }
-    })
-    .catch(err => {
-        console.error("Backend pipeline offline", err);
-        alert("Cannot reach backend engine server. Ensure your Sandbox isn't sleeping!");
-    });
-}
 
-// 📥 Send the token back to check if it matches the server's record
-function submitBackendVerification() {
-    const code = document.getElementById("secureToken").value.trim();
-
-    fetch(`${BACKEND_URL}/api/auth/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: confirmedUserEmail, code: code })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert("👑 Security Gate Cleared! Verification Identity Authenticated.");
-            closeSecurityGate();
-            
-            // 🔓 SUCCESS: Trigger your original shop creation lease prompt window here!
-            // (Pass your existing frontend layout rent module function name below, e.g.:)
-            openOriginalRentForm(targetBoothIdToRent); 
-        } else {
-            alert("Invalid security token code. Access denied.");
+        function closeSecurityGate() {
+            document.getElementById("securityModal").style.display = "none";
         }
-    })
-    .catch(err => alert("Verification error occurred."));
-}
+
+        // 📤 Post signup details directly to your live CodeSandbox backend server
+        function submitBackendSignup() {
+            const email = document.getElementById("secureEmail").value.trim();
+            const password = document.getElementById("securePassword").value;
+
+            if (!email || !password) {
+                alert("Please fill out all mandatory registration rows.");
+                return;
+            }
+
+            fetch(`${BACKEND_URL}/api/auth/signup`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    confirmedUserEmail = email;
+                    // Advance to the 6-digit verification code screen phase layout
+                    document.getElementById("authSignupStep").style.display = "none";
+                    document.getElementById("authVerifyStep").style.display = "block";
+                    alert("Account initialized! Look at your dark green CodeSandbox console log to grab your verification code key.");
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error("Backend pipeline offline", err);
+                alert("Cannot reach backend engine server. Ensure your Sandbox isn't sleeping!");
+            });
+        }
+
+        // 📥 Send the token back to check if it matches the server's record
+        function submitBackendVerification() {
+            const code = document.getElementById("secureToken").value.trim();
+
+            fetch(`${BACKEND_URL}/api/auth/verify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: confirmedUserEmail, code: code })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("👑 Security Gate Cleared! Verification Identity Authenticated.");
+                    closeSecurityGate();
+                    
+                    // 🔓 SUCCESS: Open the original rental form modal
+                    openRentalForm(targetBoothIdToRent); 
+                } else {
+                    alert("Invalid security token code. Access denied.");
+                }
+            })
+            .catch(err => alert("Verification error occurred."));
+        }
     </script>
 </body>
 </html>
