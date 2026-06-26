@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéCon Online | The Ultimate Virtual TCG Experience</title>
+    <style>
+        /* Basic Styling to make it look clean and Poké-themed */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #e3350d; /* Pokémon Red */
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80') center/cover;
+            color: white;
+            text-align: center;
+            padding: 100px 20px;
+        }
+        .hero h2 {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        .features {
+            display: flex;
+            justify-content: space-around;
+            padding: 50px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 28%;
+            text-align: center;
+        }
+        .card h3 {
+            color: #2a75d3; /* Pokémon Blue */
+        }
+        .btn {
+            display: inline-block;
+            background-color: #ffcb05; /* Pokémon Yellow */
+            color: #333;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🌐 PokéCon Online</h1>
+        <nav>
+            <a href="#market">Marketplace</a>
+            <a href="#binders">Binders</a>
+            <a href="#battle">Battle Arena</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h2>The Physical Card Con, Completely Online.</h2>
+        <p>Rent a booth, rip packs live, show off your collection, and scan your cards to battle globally.</p>
+        <a href="#market" class="btn">Explore the Con Floor</a>
+    </section>
+
+    <section class="features">
+        <div class="card" id="market">
+            <h3>🏪 Live Marketplace</h3>
+            <p>Rent a virtual booth, stream your pack openings, and sell singles securely to collectors worldwide.</p>
+            <a href="#" class="btn" style="background-color: #e3350d; color: white;">Open a Booth</a>
+        </div>
+
+        <div class="card" id="binders">
+            <h3>📖 Binder Showroom</h3>
+            <p>Upload your digital card binder. Let people flip through your pages, leave likes, and send trade offers.</p>
+            <a href="#" class="btn" style="background-color: #e3350d; color: white;">View Binders</a>
+        </div>
+
+        <div class="card" id="battle">
+            <h3>⚔️ Scanner & Battle Arena</h3>
+            <p>Scan your real-life physical cards into your profile and face off against other trainers in real-time.</p>
+            <a href="#" class="btn" style="background-color: #e3350d; color: white;">Enter Arena</a>
+        </div>
+    </section>
+
+</body>
+</html>
