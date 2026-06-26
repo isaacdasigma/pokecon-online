@@ -115,7 +115,6 @@
             align-self: flex-start;
         }
         
-        /* 📹 OPTIONAL WEBCAM STREAM */
         .webcam-box {
             width: 100%;
             height: 140px;
@@ -123,7 +122,7 @@
             border-radius: 8px;
             margin-bottom: 10px;
             overflow: hidden;
-            display: none; /* Hidden by default until streaming starts */
+            display: none;
         }
         .webcam-box.streaming {
             display: block;
@@ -134,7 +133,6 @@
             object-fit: cover;
         }
         
-        /* 📸 IMAGE SHOWCASE AREA */
         .showcase-box {
             width: 100%;
             height: 140px;
@@ -210,7 +208,6 @@
             box-sizing: border-box;
         }
 
-        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -362,7 +359,6 @@
                     renderEmptyBooth(container, id);
                 } else {
                     renderOccupiedBooth(container, id, booth);
-                    // If they saved their state as actively streaming, resume it on refresh
                     if (booth.isLive) {
                         startWebcam(id);
                     }
@@ -415,27 +411,24 @@
                     </div>
                     <div>
                         <button class="${liveBtnClass}" id="live-btn-${id}" onclick="toggleLiveStream('${id}')">${liveBtnText}</button>
-                        <button class="btn btn-blue">View Shop</button>
+                        <a href="shop.html?id=${id}" class="btn btn-blue" style="display:block;">View Shop</a>
                         <button class="btn btn-kick" onclick="kickOut('${id}')">Close Booth</button>
                     </div>
                 </div>
             `;
         }
 
-        // Toggle Live Stream on and off manually inside the card
         async function toggleLiveStream(id) {
             const savedData = JSON.parse(localStorage.getItem(id));
             if (!savedData) return;
 
             if (savedData.isLive) {
-                // Stop the stream
                 if (activeStreams[id]) {
                     activeStreams[id].getTracks().forEach(track => track.stop());
                     delete activeStreams[id];
                 }
                 savedData.isLive = false;
             } else {
-                // Start the stream
                 savedData.isLive = true;
             }
 
@@ -453,11 +446,6 @@
                 }
             } catch (err) {
                 console.error("Camera unavailable", err);
-                const badge = document.getElementById(`badge-${id}`);
-                if (badge) {
-                    badge.className = "badge offline";
-                    badge.innerText = "Cam Error";
-                }
             }
         }
 
@@ -479,7 +467,6 @@
             const timestamp = new Date().getTime();
 
             const processAndSave = (imgBase64 = null) => {
-                // Shops open as offline/static by default (isLive: false)
                 const boothData = { shopName, trainerName, description, specialty, timestamp, image: imgBase64, isLive: false };
                 localStorage.setItem(targetedBoothId, JSON.stringify(boothData));
                 renderBooth(targetedBoothId);
