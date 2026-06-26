@@ -32,6 +32,11 @@
             font-size: 24px;
             text-transform: uppercase;
         }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
         .back-btn {
             color: white;
             text-decoration: none;
@@ -41,6 +46,22 @@
             background: #2a75d3;
             padding: 8px 16px;
             border-radius: 6px;
+        }
+        /* Mode Switcher Styling */
+        .mode-toggle {
+            background: #444;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid #ffcb05;
+            color: #ffcb05;
+            text-transform: uppercase;
+        }
+        .mode-toggle.renter-on {
+            background: #ffcb05;
+            color: #222;
         }
         .shop-container {
             max-width: 900px;
@@ -106,7 +127,6 @@
             object-fit: cover;
         }
         
-        /* 🛍️ CLICKABLE IMAGE SHOWCASE BRICKS */
         .image-showcase-large {
             background: #e9e9f0;
             border-radius: 12px;
@@ -152,13 +172,17 @@
             margin-top: 10px;
         }
 
-        /* 📋 ORDERS MANAGEMENT SYSTEM DASHBOARD */
+        /* 📋 ORDERS DASHBOARD (Controlled by the Switch) */
         .dashboard-panel {
             margin-top: 40px;
             background: #fcfcff;
             border: 2px solid #2a75d3;
             border-radius: 12px;
             padding: 25px;
+            display: none; /* Hidden by default */
+        }
+        .dashboard-panel.visible {
+            display: block; /* Shown only when Renter Mode is activated */
         }
         .dashboard-panel h3 {
             margin-top: 0;
@@ -258,7 +282,10 @@
 
     <header>
         <h1 id="navHeader">🏪 Con Storefront</h1>
-        <a href="marketplace.html" class="back-btn">⬅️ Exit to Floor</a>
+        <div class="header-actions">
+            <button id="modeToggleBtn" class="mode-toggle" onclick="toggleRenterMode()">Renter View: OFF</button>
+            <a href="marketplace.html" class="back-btn">⬅️ Exit Floor</a>
+        </div>
     </header>
 
     <main class="shop-container" id="shopContent">
@@ -267,11 +294,11 @@
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-content">
             <h3>🛒 Place Your Order</h3>
-            <p style="font-size: 13px; color: #555; margin: -5px 0 15px 0;">Claim your card or pack bundle right from the stream display picture.</p>
+            <p style="font-size: 13px; color: #555; margin: -5px 0 15px 0;">Claim your item right from the showcase picture display.</p>
             
             <div class="form-group">
                 <label for="itemClaimed">What are you buying?</label>
-                <input type="text" id="itemClaimed" placeholder="e.g., 1x Base Set Booster Pack / Charizard Single">
+                <input type="text" id="itemClaimed" placeholder="e.g., 1x Base Set Booster Pack">
             </div>
             <div class="form-group">
                 <label for="buyerName">Your Full Name</label>
@@ -279,7 +306,7 @@
             </div>
             <div class="form-group">
                 <label for="shippingAddress">Shipping Address</label>
-                <textarea id="shippingAddress" rows="3" placeholder="123 Pallet Town Way, Kanto Region, 00124" style="width:100%; border:2px solid #ccc; border-radius:6px; font-family:inherit; padding:8px; box-sizing:border-box;"></textarea>
+                <textarea id="shippingAddress" rows="3" placeholder="123 Pallet Town Way, Kanto Region"></textarea>
             </div>
 
             <div class="modal-actions">
@@ -291,13 +318,20 @@
 
     <script>
         let currentBoothId = '';
+        // Use sessionStorage so turning on renter view in one tab doesn't activate it in the other tab!
+        let isRenterViewActive = false; 
 
         document.addEventListener("DOMContentLoaded", () => {
             const params = new URLSearchParams(window.location.search);
             currentBoothId = params.get('id');
+            
+            // Check if this specific tab was already configured as a renter layout
+            if (sessionStorage.getItem(`renter-mode-${currentBoothId}`) === 'true') {
+                isRenterViewActive = true;
+            }
+
             loadShopPage();
 
-            // Listen for data updates on other tabs to refresh incoming alerts instantly
             window.addEventListener('storage', (e) => {
                 if (e.key === currentBoothId || e.key === `${currentBoothId}-orders`) {
                     loadShopPage();
@@ -305,8 +339,17 @@
             });
         });
 
+        // Toggle layout style for this specific browser window tab alone
+        function toggleRenterMode() {
+            isRenterViewActive = !isRenterViewActive;
+            sessionStorage.setItem(`renter-mode-${currentBoothId}`, isRenterViewActive);
+            loadShopPage();
+        }
+
         function loadShopPage() {
             const shopContent = document.getElementById('shopContent');
+            const toggleBtn = document.getElementById('modeToggleBtn');
+            
             if (!currentBoothId) {
                 showError("No store parameters selected.");
                 return;
@@ -320,6 +363,15 @@
 
             const booth = JSON.parse(savedData);
             
+            // Update the Toggle button styles based on local tab settings
+            if (isRenterViewActive) {
+                toggleBtn.innerText = "Renter View: ON 👑";
+                toggleBtn.classList.add('renter-on');
+            } else {
+                toggleBtn.innerText = "Renter View: OFF 👤";
+                toggleBtn.classList.remove('renter-on');
+            }
+
             document.title = `${booth.shopName} | PokéCon Store`;
             document.getElementById('navHeader').innerText = `🏪 ${booth.shopName}`;
 
@@ -329,9 +381,9 @@
             
             const imgHtml = booth.image 
                 ? `<img src="${booth.image}"><div class="hover-buy-banner">✨ Click Image to Buy Items!</div>` 
-                : `<p style="color:#757575; padding: 20px; text-align:center;">No display picture uploaded.<br>(Renter must upload showcase image to activate checkout features)</p>`;
+                : `<p style="color:#757575; padding: 20px; text-align:center;">No display picture uploaded.</p>`;
 
-            // Pull current orders for this store
+            // Pull order history logs
             const orderHistory = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
             let ordersHtml = `<p style="color:#666; font-size:14px;">No incoming orders yet.</p>`;
             
@@ -359,7 +411,6 @@
                     <div class="${videoClass}">
                         <video id="shopVideo" autoplay playsinline muted></video>
                     </div>
-                    
                     <div class="image-showcase-large" onclick="openCheckout(${booth.image ? true : false})">
                         ${imgHtml}
                     </div>
@@ -369,9 +420,9 @@
                 <p style="font-size: 16px; line-height: 1.6; color:#333; margin-bottom: 20px;">${booth.description}</p>
                 <div class="specialty-tag">${booth.specialty}</div>
 
-                <div class="dashboard-panel">
+                <div class="dashboard-panel ${isRenterViewActive ? 'visible' : ''}">
                     <h3>👑 Renter Live Dashboard: Incoming Orders</h3>
-                    <p style="font-size: 13px; color: #555; margin-top: -5px;">Keep this panel open! When buyers fill out forms, item info and shipment tags generate here live.</p>
+                    <p style="font-size: 13px; color: #555; margin-top: -5px;">Keep this panel open to check items and shipping tags generated here live.</p>
                     <div id="ordersListContainer">
                         ${ordersHtml}
                     </div>
@@ -384,7 +435,7 @@
         }
 
         function openCheckout(hasImage) {
-            if (!hasImage) return; // Can't buy if there's no item visual posted
+            if (!hasImage) return; 
             document.getElementById('checkoutModal').classList.add('active');
         }
 
@@ -397,19 +448,17 @@
             const name = document.getElementById('buyerName').value || "Anonymous Collector";
             const address = document.getElementById('shippingAddress').value || "No Address Provided";
 
-            // Push order into list
             const orderHistory = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
             orderHistory.push({ item, name, address });
             localStorage.setItem(`${currentBoothId}-orders`, JSON.stringify(orderHistory));
 
-            // Alert user and clean up setup
-            alert(`🎉 Order placed successfully! The booth renter has been updated.`);
+            alert(`🎉 Order placed successfully!`);
             document.getElementById('itemClaimed').value = '';
             document.getElementById('buyerName').value = '';
             document.getElementById('shippingAddress').value = '';
             
             closeCheckout();
-            loadShopPage(); // Re-render window items
+            loadShopPage(); 
         }
 
         function clearOrder(index) {
