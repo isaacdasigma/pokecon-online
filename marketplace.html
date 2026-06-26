@@ -1,1 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéCon Online | Live Exhibition Floor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gill+Sans+MT:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #222222;
+            padding-bottom: 80px;
+        }
+        header {
+            background-color: #2a75d3; /* Blue Header for Marketplace */
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            margin: 0;
+            font-size: 24px;
+            text-transform: uppercase;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .floor-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .floor-title {
+            font-family: 'Montserrat', sans-serif;
+            color: #e3350d;
+            text-transform: uppercase;
+            border-bottom: 3px solid #ffcb05;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .booth-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .booth-card {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .booth-card:hover {
+            transform: translateY(-5px);
+            border-color: #2a75d3;
+        }
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .badge.live {
+            background-color: #ff0000;
+            color: white;
+            animation: blink 1.5s infinite;
+        }
+        .badge.offline {
+            background-color: #757575;
+            color: white;
+        }
+        .booth-card h4 {
+            font-family: 'Montserrat', sans-serif;
+            margin: 10px 0 5px 0;
+            font-size: 18px;
+        }
+        .seller-name {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .specialty {
+            background: #f0f4f8;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #ffcb05;
+            color: #222;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 13px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            text-align: center;
+            border: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .btn-blue {
+            background-color: #2a75d3;
+            color: white;
+        }
+        .rent-booth {
+            border: 3px dashed #b0b0b0; 
+            background: #fafafa; 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 30px;
+            border-radius: 12px;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
 
+    <header>
+        <h1>🏪 PokéCon Marketplace</h1>
+        <nav>
+            <a href="index.html">⬅️ Back to Lobby</a>
+        </nav>
+    </header>
+
+    <div class="floor-container">
+        <h3 class="floor-title">Exhibition Hall A</h3>
+        
+        <div class="booth-grid">
+            <div class="booth-card">
+                <span class="badge live">🔴 Live Pack Rip</span>
+                <h4>Paldea Customs</h4>
+                <div class="seller-name">by Trainer_Alex</div>
+                <p>Opening brand new Japanese booster boxes live! Grab your slots now.</p>
+                <div class="specialty">🎯 Japanese Sets</div>
+                <a href="#" class="btn">Enter Booth</a>
+            </div>
+
+            <div class="booth-card">
+                <span class="badge offline">Shop Open</span>
+                <h4>Kanto Vintage Co.</h4>
+                <div class="seller-name">by MasterGamer99</div>
+                <p>Selling raw and graded Base Set, Jungle, and Fossil holo cards.</p>
+                <div class="specialty">🦖 Vintage (1999)</div>
+                <a href="#" class="btn btn-blue">View Inventory</a>
+            </div>
+
+            <div class="rent-booth">
+                <h4 style="color: #757575; margin: 0 0 10px 0;">Booth #03</h4>
+                <p style="font-size: 14px; color: #888; margin: 0 0 15px 0;">Available for rent.</p>
+                <a href="#" class="btn" style="background-color: #e3350d; color: white;">Rent Here</a>
+            </div>
+
+            <div class="rent-booth">
+                <h4 style="color: #757575; margin: 0 0 10px 0;">Booth #04</h4>
+                <p style="font-size: 14px; color: #888; margin: 0 0 15px 0;">Available for rent.</p>
+                <a href="#" class="btn" style="background-color: #e3350d; color: white;">Rent Here</a>
+            </div>
+
+            <div class="rent-booth">
+                <h4 style="color: #757575; margin: 0 0 10px 0;">Booth #05</h4>
+                <p style="font-size: 14px; color: #888; margin: 0 0 15px 0;">Available for rent.</p>
+                <a href="#" class="btn" style="background-color: #e3350d; color: white;">Rent Here</a>
+            </div>
+
+            <div class="rent-booth">
+                <h4 style="color: #757575; margin: 0 0 10px 0;">Booth #06</h4>
+                <p style="font-size: 14px; color: #888; margin: 0 0 15px 0;">Available for rent.</p>
+                <a href="#" class="btn" style="background-color: #e3350d; color: white;">Rent Here</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 PokéCon Online Concept</p>
+    </footer>
+
+</body>
+</html>
