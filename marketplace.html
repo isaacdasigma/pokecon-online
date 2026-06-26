@@ -69,7 +69,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 480px;
+            min-height: 460px;
         }
         .booth-card:hover {
             transform: translateY(-5px);
@@ -91,6 +91,10 @@
             color: white;
             animation: blink 1.5s infinite;
         }
+        .badge.offline {
+            background-color: #757575;
+            color: white;
+        }
         .booth-card h4 {
             font-family: 'Montserrat', sans-serif;
             margin: 10px 0 5px 0;
@@ -111,7 +115,7 @@
             align-self: flex-start;
         }
         
-        /* 📹 STREAM LAYOUT */
+        /* 📹 OPTIONAL WEBCAM STREAM */
         .webcam-box {
             width: 100%;
             height: 140px;
@@ -119,7 +123,10 @@
             border-radius: 8px;
             margin-bottom: 10px;
             overflow: hidden;
-            position: relative;
+            display: none; /* Hidden by default until streaming starts */
+        }
+        .webcam-box.streaming {
+            display: block;
         }
         .webcam-box video {
             width: 100%;
@@ -127,10 +134,10 @@
             object-fit: cover;
         }
         
-        /* 📸 CARD/PACK SHOWCASE IMAGE */
+        /* 📸 IMAGE SHOWCASE AREA */
         .showcase-box {
             width: 100%;
-            height: 120px;
+            height: 140px;
             background: #e9e9f0;
             border-radius: 8px;
             margin-bottom: 15px;
@@ -168,17 +175,26 @@
             width: 100%;
             box-sizing: border-box;
             cursor: pointer;
+            margin-bottom: 5px;
         }
         .btn-blue {
             background-color: #2a75d3;
             color: white;
         }
+        .btn-live-toggle {
+            background-color: #e3350d;
+            color: white;
+        }
+        .btn-live-toggle.active-live {
+            background-color: #333;
+            color: #fff;
+        }
         .btn-kick {
             background-color: #757575;
             color: white;
-            margin-top: 5px;
             font-size: 11px;
             padding: 5px;
+            margin-top: 5px;
         }
         .rent-booth {
             border: 3px dashed #b0b0b0; 
@@ -190,7 +206,7 @@
             align-items: center; 
             padding: 30px;
             border-radius: 12px;
-            min-height: 480px;
+            min-height: 460px;
             box-sizing: border-box;
         }
 
@@ -222,8 +238,6 @@
             max-width: 400px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             border: 4px solid #ffcb05;
-            max-height: 85vh;
-            overflow-y: auto;
         }
         .modal-content h3 {
             font-family: 'Montserrat', sans-serif;
@@ -289,7 +303,7 @@
         <div class="modal-content">
             <h3>🎪 Rent Your Booth</h3>
             <div class="form-group">
-                <label for="shopName">Shop / Stream Name</label>
+                <label for="shopName">Shop Name</label>
                 <input type="text" id="shopName" placeholder="e.g., Charizard Central">
             </div>
             <div class="form-group">
@@ -297,7 +311,7 @@
                 <input type="text" id="trainerName" placeholder="e.g., Trainer_Red">
             </div>
             <div class="form-group">
-                <label for="description">What are you doing/selling?</label>
+                <label for="description">Booth Description</label>
                 <input type="text" id="description" placeholder="e.g., Pulling heavy hitters!">
             </div>
             <div class="form-group">
@@ -315,7 +329,7 @@
             </div>
             <div class="modal-actions">
                 <button class="btn btn-blue" onclick="closeRentalForm()">Cancel</button>
-                <button class="btn" style="background-color: #e3350d; color: white;" onclick="submitRentalForm()">Start Streaming!</button>
+                <button class="btn" style="background-color: #e3350d; color: white;" onclick="submitRentalForm()">Open Shop</button>
             </div>
         </div>
     </div>
@@ -348,7 +362,10 @@
                     renderEmptyBooth(container, id);
                 } else {
                     renderOccupiedBooth(container, id, booth);
-                    startWebcam(id);
+                    // If they saved their state as actively streaming, resume it on refresh
+                    if (booth.isLive) {
+                        startWebcam(id);
+                    }
                 }
             } else {
                 renderEmptyBooth(container, id);
@@ -367,23 +384,28 @@
         }
 
         function renderOccupiedBooth(container, id, booth) {
-            // Check if there's a custom uploaded image, otherwise use a placeholder
             const cardImgHtml = booth.image 
                 ? `<img src="${booth.image}" alt="Showcase Items">` 
-                : `<p style="color: #999; font-size: 12px; margin: 45px 0 0 0;">No picture uploaded</p>`;
+                : `<p style="color: #999; font-size: 12px; margin: 55px 0 0 0;">No picture uploaded</p>`;
+            
+            const badgeClass = booth.isLive ? 'badge live' : 'badge offline';
+            const badgeText = booth.isLive ? '🔴 Live Stream' : 'Shop Open';
+            const webcamClass = booth.isLive ? 'webcam-box streaming' : 'webcam-box';
+            const liveBtnText = booth.isLive ? '🛑 Stop Streaming' : '🎥 Go Live Now';
+            const liveBtnClass = booth.isLive ? 'btn btn-live-toggle active-live' : 'btn btn-live-toggle';
 
             container.innerHTML = `
                 <div class="booth-card">
                     <div>
-                        <span class="badge live">🔴 Live Stream</span>
+                        <span class="${badgeClass}" id="badge-${id}">${badgeText}</span>
                         <h4>${booth.shopName}</h4>
                         <div class="seller-name">by ${booth.trainerName}</div>
                         
-                        <div class="webcam-box">
+                        <div class="${webcamClass}" id="webcam-${id}">
                             <video id="video-${id}" autoplay playsinline muted></video>
                         </div>
 
-                        <span class="showcase-label">🔥 Card/Pack Featured Showcase:</span>
+                        <span class="showcase-label">🔥 Showcase Items:</span>
                         <div class="showcase-box">
                             ${cardImgHtml}
                         </div>
@@ -392,11 +414,33 @@
                         <div class="specialty">${booth.specialty}</div>
                     </div>
                     <div>
-                        <button class="btn">View Shop</button>
-                        <button class="btn btn-kick" onclick="kickOut('${id}')">End Stream</button>
+                        <button class="${liveBtnClass}" id="live-btn-${id}" onclick="toggleLiveStream('${id}')">${liveBtnText}</button>
+                        <button class="btn btn-blue">View Shop</button>
+                        <button class="btn btn-kick" onclick="kickOut('${id}')">Close Booth</button>
                     </div>
                 </div>
             `;
+        }
+
+        // Toggle Live Stream on and off manually inside the card
+        async function toggleLiveStream(id) {
+            const savedData = JSON.parse(localStorage.getItem(id));
+            if (!savedData) return;
+
+            if (savedData.isLive) {
+                // Stop the stream
+                if (activeStreams[id]) {
+                    activeStreams[id].getTracks().forEach(track => track.stop());
+                    delete activeStreams[id];
+                }
+                savedData.isLive = false;
+            } else {
+                // Start the stream
+                savedData.isLive = true;
+            }
+
+            localStorage.setItem(id, JSON.stringify(savedData));
+            renderBooth(id);
         }
 
         async function startWebcam(id) {
@@ -409,6 +453,11 @@
                 }
             } catch (err) {
                 console.error("Camera unavailable", err);
+                const badge = document.getElementById(`badge-${id}`);
+                if (badge) {
+                    badge.className = "badge offline";
+                    badge.innerText = "Cam Error";
+                }
             }
         }
 
@@ -430,11 +479,11 @@
             const timestamp = new Date().getTime();
 
             const processAndSave = (imgBase64 = null) => {
-                const boothData = { shopName, trainerName, description, specialty, timestamp, image: imgBase64 };
+                // Shops open as offline/static by default (isLive: false)
+                const boothData = { shopName, trainerName, description, specialty, timestamp, image: imgBase64, isLive: false };
                 localStorage.setItem(targetedBoothId, JSON.stringify(boothData));
                 renderBooth(targetedBoothId);
                 
-                // Clear out values
                 document.getElementById('shopName').value = '';
                 document.getElementById('trainerName').value = '';
                 document.getElementById('description').value = '';
@@ -442,7 +491,6 @@
                 closeRentalForm();
             };
 
-            // Read the image file if it exists, convert it to an format localStorage can hold
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
