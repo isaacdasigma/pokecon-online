@@ -170,7 +170,7 @@
             margin-top: 20px;
         }
 
-        /* 🛒 SHOPPING & INVENTORY INTERACTIVE BINDER */
+        /* BINDER SHOWCASE */
         .side-panel {
             display: flex;
             flex-direction: column;
@@ -225,7 +225,7 @@
         .item-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .item-price { font-size: 14px; color: var(--accent-yellow); font-weight: 700; }
 
-        /* 🧾 CART SYSTEM SHEET */
+        /* CART SYSTEM SHEET */
         .cart-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -242,9 +242,9 @@
             font-size: 14px;
         }
 
-        /* 👑 METRIC ANALYTICS DASHBOARD panel */
+        /* RENTER DASHBOARD PANELS */
         .dashboard-panel {
-            max-width: 1260px;
+            max-width: 1300px;
             margin: 40px auto;
             padding: 0 20px;
             display: none;
@@ -256,6 +256,16 @@
             border: 2px solid var(--primary);
             border-radius: 20px;
             padding: 30px;
+        }
+
+        .dashboard-flex-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 25px;
+        }
+        @media (max-width: 768px) {
+            .dashboard-flex-grid { grid-template-columns: 1fr; }
         }
 
         .metrics-grid {
@@ -272,15 +282,22 @@
             text-align: center;
         }
         .metric-brick div { font-size: 13px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-        .metric-brick span { font-size: 28px; font-weight: 700; color: var(--accent-yellow); font-family: 'Montserrat'; }
+        .metric-brick span { font-size: 24px; font-weight: 700; color: var(--accent-yellow); font-family: 'Montserrat'; }
 
         .order-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-left: 6px solid var(--primary);
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             margin-bottom: 15px;
+        }
+
+        .dash-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 14px;
         }
 
         .btn {
@@ -299,6 +316,8 @@
         .btn:hover { background: var(--primary-dark); }
         .btn-checkout { background: var(--accent); }
         .btn-checkout:hover { background: #b82605; }
+        .btn-add { background: var(--accent-yellow); color: #111; border-radius: 8px; margin-top: 10px; }
+        .btn-add:hover { background: #e0b204; }
 
         /* Pop-up Modals */
         .modal-overlay {
@@ -385,7 +404,7 @@
     <main class="dashboard-panel" id="renterDashboard">
         <div class="dash-inner">
             <h3 style="font-family: 'Montserrat'; margin: 0 0 5px 0; color: #fff;">👑 Renter Management Workspace</h3>
-            <p style="color: var(--text-muted); font-size:13px; margin: 0 0 20px 0;">Track revenue metrics and pull instant packaging slips below.</p>
+            <p style="color: var(--text-muted); font-size:13px; margin: 0 0 20px 0;">Track revenue metrics and publish custom binder inventory lists.</p>
             
             <div class="metrics-grid">
                 <div class="metric-brick">
@@ -402,8 +421,29 @@
                 </div>
             </div>
 
-            <h4 style="font-family:'Montserrat'; font-size:15px; margin-bottom:15px; border-bottom: 1px solid var(--border); padding-bottom:8px;">📦 Active Packing Labels</h4>
-            <div id="slipsContainer"></div>
+            <div class="dashboard-flex-grid">
+                <div class="dash-box">
+                    <h4 style="font-family:'Montserrat'; font-size:15px; margin:0 0 15px 0; color:var(--accent-yellow); text-transform:uppercase;">➕ List Item to Binder Showcase</h4>
+                    <div class="form-group">
+                        <label>Card / Pack Name</label>
+                        <input type="text" id="prodName" placeholder="e.g., Base Set Charizard Holo">
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($ USD)</label>
+                        <input type="number" id="prodPrice" step="0.01" placeholder="e.g., 299.99">
+                    </div>
+                    <div class="form-group">
+                        <label>Product Display Image</label>
+                        <input type="file" id="prodImage" accept="image/*">
+                    </div>
+                    <button class="btn btn-add" onclick="addNewProductToBinder()">Publish to Store Binder</button>
+                </div>
+
+                <div class="dash-box">
+                    <h4 style="font-family:'Montserrat'; font-size:15px; margin:0 0 15px 0; border-bottom: 1px solid var(--border); padding-bottom:8px;">📦 Active Packing Labels</h4>
+                    <div id="slipsContainer"></div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -416,7 +456,7 @@
             </div>
             <div class="form-group">
                 <label>Destination Shipping Address</label>
-                <textarea id="shippingAddress" rows="3" placeholder="Pallet Laboratory, Kanto HQ, Suite 4"></textarea>
+                <textarea id="shippingAddress" rows="3" placeholder="Pallet Laboratory, Kanto HQ"></textarea>
             </div>
             <div class="modal-actions" style="display:flex; gap:10px; margin-top:20px;">
                 <button class="back-btn" style="width:50%; text-align:center;" onclick="closeCheckout()">Cancel</button>
@@ -430,29 +470,11 @@
         let isRenterViewActive = false;
         let shoppingCart = [];
 
-        // Dynamic visual catalog mock data custom mapped to user themes
-        const catalogTemplates = {
-            "⚔️ Modern TCG": [
-                { name: "Silver Tempest Pack", price: 4.99, img: "https://images.pokemontcg.io/swsh12/logo.png" },
-                { name: "Crown Zenith Elite Box", price: 49.99, img: "https://images.pokemontcg.io/swsh12pt/logo.png" },
-                { name: "Charizard ex Alt-Art", price: 120.00, img: "https://images.pokemontcg.io/sv3/223.png" }
-            ],
-            "🦖 Vintage (1999)": [
-                { name: "1999 Base Set Pack", price: 375.00, img: "https://images.pokemontcg.io/base1/logo.png" },
-                { name: "Jungle Booster Pack", price: 180.00, img: "https://images.pokemontcg.io/base2/logo.png" },
-                { name: "Holo Blastoise (Played)", price: 85.00, img: "https://images.pokemontcg.io/base1/2.png" }
-            ],
-            "🎯 Japanese Sets": [
-                { name: "151 Japanese Booster Box", price: 95.00, img: "https://images.pokemontcg.io/sv3pt5/logo.png" },
-                { name: "Shiny Treasure ex Box", price: 65.00, img: "https://images.pokemontcg.io/sv4a/logo.png" },
-                { name: "Pikachu Masterball Holo", price: 45.00, img: "https://images.pokemontcg.io/sv3pt5/25.png" }
-            ],
-            "🎨 Custom Art/Pins": [
-                { name: "Gengar Enamel Pin", price: 12.50, img: "https://images.pokemontcg.io/swsh1/logo.png" },
-                { name: "Custom Holo Token Card", price: 8.00, img: "https://images.pokemontcg.io/swsh2/logo.png" },
-                { name: "Art Mystery Binder Box", price: 35.00, img: "https://images.pokemontcg.io/swsh3/logo.png" }
-            ]
-        };
+        // Fallback default stock listings if the user hasn't added items yet
+        const defaultStock = [
+            { name: "Booster Pack Box Lot", price: 15.00, img: "https://images.pokemontcg.io/swsh12/logo.png" },
+            { name: "Mystery Vault Single Pull", price: 8.50, img: "https://images.pokemontcg.io/sv3pt5/25.png" }
+        ];
 
         document.addEventListener("DOMContentLoaded", () => {
             const params = new URLSearchParams(window.location.search);
@@ -464,8 +486,9 @@
 
             loadPremiumShop();
 
+            // Auto-refresh when items are added from the renter side window
             window.addEventListener('storage', (e) => {
-                if (e.key === currentBoothId || e.key === `${currentBoothId}-orders`) {
+                if (e.key === currentBoothId || e.key === `${currentBoothId}-orders` || e.key === `${currentBoothId}-products`) {
                     loadPremiumShop();
                 }
             });
@@ -488,7 +511,6 @@
 
             const booth = JSON.parse(savedData);
 
-            // Interface Updates
             toggleBtn.innerText = isRenterViewActive ? "Renter Dashboard: ON 👑" : "Renter Dashboard: OFF 👤";
             toggleBtn.className = isRenterViewActive ? "mode-toggle renter-on" : "mode-toggle";
             document.getElementById('renterDashboard').className = isRenterViewActive ? "dashboard-panel visible" : "dashboard-panel";
@@ -498,7 +520,6 @@
             document.getElementById('trainerLabel').innerText = booth.trainerName;
             document.getElementById('storeDesc').innerText = booth.description;
 
-            // Stream Handling Elements
             const badge = document.getElementById('liveBadge');
             const videoWrapper = document.getElementById('videoWrapper');
             if (booth.isLive) {
@@ -512,19 +533,55 @@
                 videoWrapper.classList.remove('active-stream');
             }
 
-            // Populate Item Binder
-            buildInventoryGrid(booth.specialty, booth.image);
+            renderInventoryGrid();
             updateCartDisplay();
             renderDashboardSlips();
         }
 
-        function buildInventoryGrid(category, customImage) {
+        // Add custom inventory items directly to local listings storage
+        function addNewProductToBinder() {
+            const name = document.getElementById('prodName').value.trim();
+            const price = parseFloat(document.getElementById('prodPrice').value);
+            const fileInput = document.getElementById('prodImage');
+
+            if (!name || isNaN(price)) {
+                alert("Please enter a valid product title and price tag layout.");
+                return;
+            }
+
+            const customProductsList = JSON.parse(localStorage.getItem(`${currentBoothId}-products`)) || [];
+
+            const saveItem = (imgBase64 = null) => {
+                customProductsList.push({ name, price, img: imgBase64 || "https://images.pokemontcg.io/swsh12/logo.png" });
+                localStorage.setItem(`${currentBoothId}-products`, JSON.stringify(customProductsList));
+                
+                // Clear input values
+                document.getElementById('prodName').value = '';
+                document.getElementById('prodPrice').value = '';
+                fileInput.value = '';
+                
+                loadPremiumShop();
+            };
+
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { saveItem(e.target.result); };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                saveItem();
+            }
+        }
+
+        function renderInventoryGrid() {
             const grid = document.getElementById('inventoryGrid');
-            const products = catalogTemplates[category] || catalogTemplates["⚔️ Modern TCG"];
+            const customProducts = JSON.parse(localStorage.getItem(`${currentBoothId}-products`)) || [];
             
-            grid.innerHTML = products.map((prod, idx) => `
+            // Show custom items if they exist, otherwise show defaults
+            const currentStockList = customProducts.length > 0 ? customProducts : defaultStock;
+
+            grid.innerHTML = currentStockList.map((prod, idx) => `
                 <div class="inventory-item" onclick="addToCart('${prod.name.replace(/'/g, "\\'")}', ${prod.price})">
-                    <img src="${(idx === 0 && customImage) ? customImage : prod.img}" alt="pack item">
+                    <img src="${prod.img}" alt="product showcase card">
                     <div class="item-name">${prod.name}</div>
                     <div class="item-price">$${prod.price.toFixed(2)}</div>
                 </div>
@@ -553,7 +610,7 @@
             }
 
             let total = 0;
-            container.innerHTML = shoppingCart.map((item, idx) => {
+            container.innerHTML = shoppingCart.map((item) => {
                 total += (item.price * item.qty);
                 return `
                     <div class="cart-item-row">
@@ -576,7 +633,6 @@
 
             if (shoppingCart.length === 0) return;
 
-            // Generate inventory package summary string
             const summaryString = shoppingCart.map(i => `${i.qty}x ${i.name}`).join(', ');
             let totalCost = shoppingCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
@@ -584,7 +640,7 @@
             orderLogs.push({ item: summaryString, name, address, revenue: totalCost });
             localStorage.setItem(`${currentBoothId}-orders`, JSON.stringify(orderLogs));
 
-            alert(`🎉 Invoice Locked! Renter dashboard notified.`);
+            alert(`🎉 Order locked successfully!`);
             shoppingCart = [];
             document.getElementById('buyerName').value = '';
             document.getElementById('shippingAddress').value = '';
@@ -610,12 +666,12 @@
             container.innerHTML = orders.map((ord, idx) => `
                 <div class="order-card">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h5 style="margin:0 0 5px 0; color:#fff; font-size:15px; font-family:'Montserrat';">📦 Packing Tag #${idx + 1}</h5>
-                        <span style="color: var(--accent-yellow); font-weight:700;">$${(ord.revenue || 0).toFixed(2)}</span>
+                        <h5 style="margin:0 0 5px 0; color:#fff; font-size:14px; font-family:'Montserrat';">📦 Order #${idx + 1}</h5>
+                        <span style="color: var(--accent-yellow); font-weight:700; font-size: 14px;">$${(ord.revenue || 0).toFixed(2)}</span>
                     </div>
-                    <p style="margin:5px 0; font-size:13px; color:var(--text-muted);"><strong>Items to Pack:</strong> ${ord.item}</p>
-                    <p style="margin:5px 0; font-size:13px; color:var(--text-muted);"><strong>Ship To:</strong> ${ord.name} - ${ord.address}</p>
-                    <button class="back-btn" style="padding:4px 12px; font-size:11px; margin-top:8px;" onclick="shipLabel(${idx})">Complete & Ship</button>
+                    <p style="margin:3px 0; font-size:12px; color:var(--text-muted);"><strong>Items:</strong> ${ord.item}</p>
+                    <p style="margin:3px 0; font-size:12px; color:var(--text-muted);"><strong>Ship To:</strong> ${ord.name} - ${ord.address}</p>
+                    <button class="back-btn" style="padding:2px 10px; font-size:10px; margin-top:5px; height:auto;" onclick="shipLabel(${idx})">Mark Shipped</button>
                 </div>
             `).join('');
         }
@@ -633,7 +689,7 @@
                 const video = document.getElementById('shopVideo');
                 if (video) video.srcObject = stream;
             } catch (err) {
-                console.error("Video element mirror failure", err);
+                console.error("Video streaming not accessible.", err);
             }
         }
     </script>
