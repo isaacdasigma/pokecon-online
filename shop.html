@@ -3,489 +3,638 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokéCon Online | Storefront</title>
+    <title>PokéCon Online | Storefront Premium</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gill+Sans+MT:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --primary: #2a75d3;
+            --primary-dark: #1b4fa0;
+            --accent: #e3350d;
+            --accent-yellow: #ffcb05;
+            --bg: #0f121d;
+            --card-bg: #1a1f32;
+            --text: #f4f4f9;
+            --text-muted: #a0a7c4;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
         body {
-            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+            font-family: 'Outfit', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f9;
-            color: #222222;
-            padding-bottom: 60px;
+            background-color: var(--bg);
+            color: var(--text);
+            padding-bottom: 100px;
         }
+
         header {
-            background-color: #333;
-            color: white;
-            padding: 20px;
+            background-color: rgba(26, 31, 50, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
+
         header h1 {
             font-family: 'Montserrat', sans-serif;
             font-weight: 800;
             margin: 0;
-            font-size: 24px;
-            text-transform: uppercase;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(45deg, #fff, var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
+
         .header-actions {
             display: flex;
             align-items: center;
             gap: 15px;
         }
+
         .back-btn {
             color: white;
             text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
+            font-weight: 600;
+            font-size: 13px;
             text-transform: uppercase;
-            background: #2a75d3;
-            padding: 8px 16px;
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 10px 18px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
         }
-        /* Mode Switcher Styling */
+        .back-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
         .mode-toggle {
-            background: #444;
-            padding: 6px 12px;
-            border-radius: 20px;
+            background: rgba(227, 53, 13, 0.1);
+            padding: 10px 18px;
+            border-radius: 30px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            border: 2px solid #ffcb05;
-            color: #ffcb05;
+            border: 1px solid var(--accent);
+            color: var(--accent);
             text-transform: uppercase;
+            transition: all 0.2s;
         }
         .mode-toggle.renter-on {
-            background: #ffcb05;
-            color: #222;
+            background: var(--accent-yellow);
+            color: #111;
+            border-color: var(--accent-yellow);
         }
-        .shop-container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-            padding: 40px;
-            border-top: 8px solid #ffcb05;
-            box-sizing: border-box;
+
+        .hero-layout {
+            max-width: 1300px;
+            margin: 30px auto;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 30px;
+            padding: 0 20px;
         }
+
+        @media (max-width: 992px) {
+            .hero-layout { grid-template-columns: 1fr; }
+        }
+
+        .main-stage {
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
         .shop-header-flex {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
+
         .shop-title h2 {
             font-family: 'Montserrat', sans-serif;
-            font-size: 32px;
+            font-size: 28px;
             margin: 0 0 5px 0;
-            color: #2a75d3;
+            font-weight: 800;
         }
+
         .badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .badge.live {
-            background-color: #ff0000;
+            background-color: var(--accent);
             color: white;
+            box-shadow: 0 0 15px rgba(227, 53, 13, 0.4);
+            animation: pulse 1.5s infinite;
         }
         .badge.offline {
-            background-color: #757575;
-            color: white;
+            background-color: rgba(255,255,255,0.1);
+            color: var(--text-muted);
         }
-        .media-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        @media (max-width: 768px) {
-            .media-layout { grid-template-columns: 1fr; }
-        }
-        .video-feed-large {
-            background: #000;
-            border-radius: 12px;
-            height: 300px;
-            overflow: hidden;
-            display: none;
-        }
-        .video-feed-large.active-stream {
-            display: block;
-        }
-        .video-feed-large video {
+
+        .video-container {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: 420px;
+            background: #06080f;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: none;
+            margin-bottom: 20px;
         }
-        
-        .image-showcase-large {
-            background: #e9e9f0;
+        .video-container.active-stream { display: block; }
+        .video-container video { width: 100%; height: 100%; object-fit: cover; }
+
+        .about-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            padding: 20px;
             border-radius: 12px;
-            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* 🛒 SHOPPING & INVENTORY INTERACTIVE BINDER */
+        .side-panel {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+            gap: 25px;
+        }
+
+        .binder-showcase {
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 25px;
+        }
+
+        .binder-showcase h3 {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 15px;
+        }
+
+        .inventory-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.2s;
             cursor: pointer;
-            border: 3px dashed transparent;
-            transition: all 0.2s ease;
             position: relative;
         }
-        .image-showcase-large:hover {
-            border-color: #e3350d;
-            background: #e1e1e9;
+        .inventory-item:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            background: rgba(42, 117, 211, 0.05);
         }
-        .image-showcase-large img {
+
+        .inventory-item img {
             width: 100%;
-            height: 100%;
+            height: 110px;
             object-fit: contain;
-        }
-        .hover-buy-banner {
-            position: absolute;
-            bottom: 0;
-            background: rgba(227, 53, 13, 0.9);
-            color: white;
-            width: 100%;
-            text-align: center;
-            padding: 8px 0;
-            font-weight: bold;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-        .specialty-tag {
-            background: #f0f4f8;
-            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 10px;
+            margin-bottom: 8px;
         }
 
-        /* 📋 ORDERS DASHBOARD (Controlled by the Switch) */
-        .dashboard-panel {
-            margin-top: 40px;
-            background: #fcfcff;
-            border: 2px solid #2a75d3;
-            border-radius: 12px;
+        .item-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-price { font-size: 14px; color: var(--accent-yellow); font-weight: 700; }
+
+        /* 🧾 CART SYSTEM SHEET */
+        .cart-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
             padding: 25px;
-            display: none; /* Hidden by default */
-        }
-        .dashboard-panel.visible {
-            display: block; /* Shown only when Renter Mode is activated */
-        }
-        .dashboard-panel h3 {
-            margin-top: 0;
-            color: #2a75d3;
-            font-family: 'Montserrat', sans-serif;
-            border-bottom: 2px solid #2a75d3;
-            padding-bottom: 8px;
-        }
-        .order-card {
-            background: white;
-            border: 1px solid #ddd;
-            border-left: 5px solid #ffcb05;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-        }
-        .order-card h5 {
-            margin: 0 0 8px 0;
-            font-size: 16px;
-            color: #e3350d;
         }
 
-        /* Modal Overlays */
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+
+        /* 👑 METRIC ANALYTICS DASHBOARD panel */
+        .dashboard-panel {
+            max-width: 1260px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: none;
+        }
+        .dashboard-panel.visible { display: block; }
+        
+        .dash-inner {
+            background: #111625;
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .metric-brick {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        .metric-brick div { font-size: 13px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+        .metric-brick span { font-size: 28px; font-weight: 700; color: var(--accent-yellow); font-family: 'Montserrat'; }
+
+        .order-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 6px solid var(--primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: var(--primary-dark); }
+        .btn-checkout { background: var(--accent); }
+        .btn-checkout:hover { background: #b82605; }
+
+        /* Pop-up Modals */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 999;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 7, 13, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 999;
         }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 420px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border: 4px solid #e3350d;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 30px; border-radius: 20px; width: 90%; max-width: 450px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
-        .modal-content h3 {
-            font-family: 'Montserrat', sans-serif;
-            margin-top: 0;
-            color: #e3350d;
-            text-transform: uppercase;
-        }
-        .form-group {
-            margin-bottom: 12px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
+        .modal-content h3 { font-family: 'Montserrat'; margin-top: 0; color: #fff; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); }
         .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 2px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-family: inherit;
+            width: 100%; padding: 10px 14px; background: #0f121d; border: 1px solid var(--border);
+            border-radius: 8px; color: white; font-family: inherit; box-sizing: border-box;
         }
-        .btn {
-            display: inline-block;
-            background-color: #ffcb05;
-            color: #222;
-            padding: 10px 20px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 13px;
-            border-radius: 6px;
-            text-transform: uppercase;
-            text-align: center;
-            border: none;
-            width: 100%;
-            box-sizing: border-box;
-            cursor: pointer;
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(227, 53, 13, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(227, 53, 13, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(227, 53, 13, 0); }
         }
-        .btn-blue { background-color: #2a75d3; color: white; }
-        .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
-        .error-message { text-align: center; padding: 50px 20px; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1 id="navHeader">🏪 Con Storefront</h1>
+        <h1 id="navHeader">🏪 Storefront Premium</h1>
         <div class="header-actions">
-            <button id="modeToggleBtn" class="mode-toggle" onclick="toggleRenterMode()">Renter View: OFF</button>
+            <button id="modeToggleBtn" class="mode-toggle" onclick="toggleRenterMode()">Renter Dashboard: OFF</button>
             <a href="marketplace.html" class="back-btn">⬅️ Exit Floor</a>
         </div>
     </header>
 
-    <main class="shop-container" id="shopContent">
-        </main>
+    <div class="hero-layout">
+        <div class="main-stage">
+            <div class="shop-header-flex">
+                <div class="shop-title">
+                    <h2 id="storeTitle">Loading Shop...</h2>
+                    <div style="color: var(--text-muted); font-size:14px;">Store Manager: <strong id="trainerLabel" style="color:#fff;">---</strong></div>
+                </div>
+                <span class="badge offline" id="liveBadge">Checking Status</span>
+            </div>
+
+            <div class="video-container" id="videoWrapper">
+                <video id="shopVideo" autoplay playsinline muted></video>
+            </div>
+
+            <div class="about-box">
+                <h4 style="margin: 0 0 8px 0; text-transform: uppercase; font-family: 'Montserrat'; font-size: 13px; color: var(--accent-yellow);">Store Bio / Live Feed Info</h4>
+                <p id="storeDesc" style="margin:0; font-size:15px; line-height:1.6; color: var(--text-muted);">No bio information uploaded.</p>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <div class="binder-showcase">
+                <h3>🗂️ Browse Store Binder</h3>
+                <div class="inventory-grid" id="inventoryGrid">
+                    </div>
+            </div>
+
+            <div class="cart-card">
+                <h3 style="font-family:'Montserrat'; margin:0 0 15px 0; font-size:16px;">🛒 Your Shipping Cart</h3>
+                <div id="cartItemsContainer">
+                    <p style="color: var(--text-muted); font-size:13px; margin:0;">Your cart is empty. Click items in the binder above to add them!</p>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin: 15px 0; font-weight:bold; border-top:1px solid var(--border); padding-top:12px;">
+                    <span>Total Bill:</span>
+                    <span id="cartTotal" style="color: var(--accent-yellow);">$0.00</span>
+                </div>
+                <button class="btn btn-checkout" id="checkoutBtn" onclick="openCheckout()" disabled>Proceed to Shipping Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="dashboard-panel" id="renterDashboard">
+        <div class="dash-inner">
+            <h3 style="font-family: 'Montserrat'; margin: 0 0 5px 0; color: #fff;">👑 Renter Management Workspace</h3>
+            <p style="color: var(--text-muted); font-size:13px; margin: 0 0 20px 0;">Track revenue metrics and pull instant packaging slips below.</p>
+            
+            <div class="metrics-grid">
+                <div class="metric-brick">
+                    <div>Gross Sales Volume</div>
+                    <span id="metricSales">$0.00</span>
+                </div>
+                <div class="metric-brick">
+                    <div>Active Packing Slips</div>
+                    <span id="metricOrdersCount">0</span>
+                </div>
+                <div class="metric-brick">
+                    <div>Booth Location Status</div>
+                    <span style="color: var(--primary);" id="metricStatus">Active</span>
+                </div>
+            </div>
+
+            <h4 style="font-family:'Montserrat'; font-size:15px; margin-bottom:15px; border-bottom: 1px solid var(--border); padding-bottom:8px;">📦 Active Packing Labels</h4>
+            <div id="slipsContainer"></div>
+        </div>
+    </main>
 
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-content">
-            <h3>🛒 Place Your Order</h3>
-            <p style="font-size: 13px; color: #555; margin: -5px 0 15px 0;">Claim your item right from the showcase picture display.</p>
-            
+            <h3>📝 Complete Your Shipment Tag</h3>
             <div class="form-group">
-                <label for="itemClaimed">What are you buying?</label>
-                <input type="text" id="itemClaimed" placeholder="e.g., 1x Base Set Booster Pack">
+                <label>Recipient Full Name</label>
+                <input type="text" id="buyerName" placeholder="Professor Oak">
             </div>
             <div class="form-group">
-                <label for="buyerName">Your Full Name</label>
-                <input type="text" id="buyerName" placeholder="Ash Ketchum">
+                <label>Destination Shipping Address</label>
+                <textarea id="shippingAddress" rows="3" placeholder="Pallet Laboratory, Kanto HQ, Suite 4"></textarea>
             </div>
-            <div class="form-group">
-                <label for="shippingAddress">Shipping Address</label>
-                <textarea id="shippingAddress" rows="3" placeholder="123 Pallet Town Way, Kanto Region"></textarea>
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn btn-blue" onclick="closeCheckout()">Cancel</button>
-                <button class="btn" style="background-color: #e3350d; color: white;" onclick="submitOrder()">Submit Order</button>
+            <div class="modal-actions" style="display:flex; gap:10px; margin-top:20px;">
+                <button class="back-btn" style="width:50%; text-align:center;" onclick="closeCheckout()">Cancel</button>
+                <button class="btn" style="width:50%;" onclick="processFinalPayment()">Lock Order</button>
             </div>
         </div>
     </div>
 
     <script>
         let currentBoothId = '';
-        // Use sessionStorage so turning on renter view in one tab doesn't activate it in the other tab!
-        let isRenterViewActive = false; 
+        let isRenterViewActive = false;
+        let shoppingCart = [];
+
+        // Dynamic visual catalog mock data custom mapped to user themes
+        const catalogTemplates = {
+            "⚔️ Modern TCG": [
+                { name: "Silver Tempest Pack", price: 4.99, img: "https://images.pokemontcg.io/swsh12/logo.png" },
+                { name: "Crown Zenith Elite Box", price: 49.99, img: "https://images.pokemontcg.io/swsh12pt/logo.png" },
+                { name: "Charizard ex Alt-Art", price: 120.00, img: "https://images.pokemontcg.io/sv3/223.png" }
+            ],
+            "🦖 Vintage (1999)": [
+                { name: "1999 Base Set Pack", price: 375.00, img: "https://images.pokemontcg.io/base1/logo.png" },
+                { name: "Jungle Booster Pack", price: 180.00, img: "https://images.pokemontcg.io/base2/logo.png" },
+                { name: "Holo Blastoise (Played)", price: 85.00, img: "https://images.pokemontcg.io/base1/2.png" }
+            ],
+            "🎯 Japanese Sets": [
+                { name: "151 Japanese Booster Box", price: 95.00, img: "https://images.pokemontcg.io/sv3pt5/logo.png" },
+                { name: "Shiny Treasure ex Box", price: 65.00, img: "https://images.pokemontcg.io/sv4a/logo.png" },
+                { name: "Pikachu Masterball Holo", price: 45.00, img: "https://images.pokemontcg.io/sv3pt5/25.png" }
+            ],
+            "🎨 Custom Art/Pins": [
+                { name: "Gengar Enamel Pin", price: 12.50, img: "https://images.pokemontcg.io/swsh1/logo.png" },
+                { name: "Custom Holo Token Card", price: 8.00, img: "https://images.pokemontcg.io/swsh2/logo.png" },
+                { name: "Art Mystery Binder Box", price: 35.00, img: "https://images.pokemontcg.io/swsh3/logo.png" }
+            ]
+        };
 
         document.addEventListener("DOMContentLoaded", () => {
             const params = new URLSearchParams(window.location.search);
             currentBoothId = params.get('id');
             
-            // Check if this specific tab was already configured as a renter layout
             if (sessionStorage.getItem(`renter-mode-${currentBoothId}`) === 'true') {
                 isRenterViewActive = true;
             }
 
-            loadShopPage();
+            loadPremiumShop();
 
             window.addEventListener('storage', (e) => {
                 if (e.key === currentBoothId || e.key === `${currentBoothId}-orders`) {
-                    loadShopPage();
+                    loadPremiumShop();
                 }
             });
         });
 
-        // Toggle layout style for this specific browser window tab alone
         function toggleRenterMode() {
             isRenterViewActive = !isRenterViewActive;
             sessionStorage.setItem(`renter-mode-${currentBoothId}`, isRenterViewActive);
-            loadShopPage();
+            loadPremiumShop();
         }
 
-        function loadShopPage() {
-            const shopContent = document.getElementById('shopContent');
+        function loadPremiumShop() {
             const toggleBtn = document.getElementById('modeToggleBtn');
-            
-            if (!currentBoothId) {
-                showError("No store parameters selected.");
-                return;
-            }
-
             const savedData = localStorage.getItem(currentBoothId);
+
             if (!savedData) {
-                showError("This booth workspace is currently vacant or the rental lease expired.");
+                document.body.innerHTML = `<div style='text-align:center; padding:100px;'><h2>⚠️ Booth Lease Expired</h2><a href='marketplace.html' style='color:#2a75d3;'>Return to Floor Map</a></div>`;
                 return;
             }
 
             const booth = JSON.parse(savedData);
-            
-            // Update the Toggle button styles based on local tab settings
-            if (isRenterViewActive) {
-                toggleBtn.innerText = "Renter View: ON 👑";
-                toggleBtn.classList.add('renter-on');
-            } else {
-                toggleBtn.innerText = "Renter View: OFF 👤";
-                toggleBtn.classList.remove('renter-on');
-            }
 
-            document.title = `${booth.shopName} | PokéCon Store`;
+            // Interface Updates
+            toggleBtn.innerText = isRenterViewActive ? "Renter Dashboard: ON 👑" : "Renter Dashboard: OFF 👤";
+            toggleBtn.className = isRenterViewActive ? "mode-toggle renter-on" : "mode-toggle";
+            document.getElementById('renterDashboard').className = isRenterViewActive ? "dashboard-panel visible" : "dashboard-panel";
+
+            document.getElementById('storeTitle').innerText = booth.shopName;
             document.getElementById('navHeader').innerText = `🏪 ${booth.shopName}`;
+            document.getElementById('trainerLabel').innerText = booth.trainerName;
+            document.getElementById('storeDesc').innerText = booth.description;
 
-            const badgeClass = booth.isLive ? 'badge live' : 'badge offline';
-            const badgeText = booth.isLive ? '🔴 Live Right Now' : 'Shop Open';
-            const videoClass = booth.isLive ? 'video-feed-large active-stream' : 'video-feed-large';
-            
-            const imgHtml = booth.image 
-                ? `<img src="${booth.image}"><div class="hover-buy-banner">✨ Click Image to Buy Items!</div>` 
-                : `<p style="color:#757575; padding: 20px; text-align:center;">No display picture uploaded.</p>`;
-
-            // Pull order history logs
-            const orderHistory = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
-            let ordersHtml = `<p style="color:#666; font-size:14px;">No incoming orders yet.</p>`;
-            
-            if (orderHistory.length > 0) {
-                ordersHtml = orderHistory.map((ord, index) => `
-                    <div class="order-card">
-                        <h5>📦 Order #${index + 1}: ${ord.item}</h5>
-                        <p style="margin: 4px 0; font-size: 14px;"><strong>Buyer:</strong> ${ord.name}</p>
-                        <p style="margin: 4px 0; font-size: 14px;"><strong>Ship To Address:</strong> ${ord.address}</p>
-                        <button class="btn" style="padding: 4px 10px; font-size: 11px; width: auto; background: #ccc; margin-top: 5px;" onclick="clearOrder(${index})">Mark as Shipped</button>
-                    </div>
-                `).join('');
-            }
-
-            shopContent.innerHTML = `
-                <div class="shop-header-flex">
-                    <div class="shop-title">
-                        <h2>${booth.shopName}</h2>
-                        <div style="color: #666; font-size:16px;">Managed by <strong>${booth.trainerName}</strong></div>
-                    </div>
-                    <span class="${badgeClass}">${badgeText}</span>
-                </div>
-
-                <div class="media-layout">
-                    <div class="${videoClass}">
-                        <video id="shopVideo" autoplay playsinline muted></video>
-                    </div>
-                    <div class="image-showcase-large" onclick="openCheckout(${booth.image ? true : false})">
-                        ${imgHtml}
-                    </div>
-                </div>
-
-                <h3>About Our Shop</h3>
-                <p style="font-size: 16px; line-height: 1.6; color:#333; margin-bottom: 20px;">${booth.description}</p>
-                <div class="specialty-tag">${booth.specialty}</div>
-
-                <div class="dashboard-panel ${isRenterViewActive ? 'visible' : ''}">
-                    <h3>👑 Renter Live Dashboard: Incoming Orders</h3>
-                    <p style="font-size: 13px; color: #555; margin-top: -5px;">Keep this panel open to check items and shipping tags generated here live.</p>
-                    <div id="ordersListContainer">
-                        ${ordersHtml}
-                    </div>
-                </div>
-            `;
-
+            // Stream Handling Elements
+            const badge = document.getElementById('liveBadge');
+            const videoWrapper = document.getElementById('videoWrapper');
             if (booth.isLive) {
-                startShopStream();
+                badge.className = "badge live";
+                badge.innerText = "🔴 Live Break Stream";
+                videoWrapper.classList.add('active-stream');
+                startShopCamera();
+            } else {
+                badge.className = "badge offline";
+                badge.innerText = "Storefront Open";
+                videoWrapper.classList.remove('active-stream');
             }
+
+            // Populate Item Binder
+            buildInventoryGrid(booth.specialty, booth.image);
+            updateCartDisplay();
+            renderDashboardSlips();
         }
 
-        function openCheckout(hasImage) {
-            if (!hasImage) return; 
-            document.getElementById('checkoutModal').classList.add('active');
+        function buildInventoryGrid(category, customImage) {
+            const grid = document.getElementById('inventoryGrid');
+            const products = catalogTemplates[category] || catalogTemplates["⚔️ Modern TCG"];
+            
+            grid.innerHTML = products.map((prod, idx) => `
+                <div class="inventory-item" onclick="addToCart('${prod.name.replace(/'/g, "\\'")}', ${prod.price})">
+                    <img src="${(idx === 0 && customImage) ? customImage : prod.img}" alt="pack item">
+                    <div class="item-name">${prod.name}</div>
+                    <div class="item-price">$${prod.price.toFixed(2)}</div>
+                </div>
+            `).join('');
         }
 
-        function closeCheckout() {
-            document.getElementById('checkoutModal').classList.remove('active');
+        function addToCart(name, price) {
+            const match = shoppingCart.find(i => i.name === name);
+            if (match) {
+                match.qty++;
+            } else {
+                shoppingCart.push({ name, price, qty: 1 });
+            }
+            updateCartDisplay();
         }
 
-        function submitOrder() {
-            const item = document.getElementById('itemClaimed').value || "Mystery Pack Lot";
+        function updateCartDisplay() {
+            const container = document.getElementById('cartItemsContainer');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            
+            if (shoppingCart.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); font-size:13px; margin:0;">Your cart is empty. Click items in the binder above to add them!</p>`;
+                document.getElementById('cartTotal').innerText = "$0.00";
+                checkoutBtn.disabled = true;
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = shoppingCart.map((item, idx) => {
+                total += (item.price * item.qty);
+                return `
+                    <div class="cart-item-row">
+                        <div><strong>${item.qty}x</strong> ${item.name}</div>
+                        <div style="color:var(--accent-yellow); font-weight:600;">$${(item.price * item.qty).toFixed(2)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('cartTotal').innerText = `$${total.toFixed(2)}`;
+            checkoutBtn.disabled = false;
+        }
+
+        function openCheckout() { document.getElementById('checkoutModal').classList.add('active'); }
+        function closeCheckout() { document.getElementById('checkoutModal').classList.remove('active'); }
+
+        function processFinalPayment() {
             const name = document.getElementById('buyerName').value || "Anonymous Collector";
-            const address = document.getElementById('shippingAddress').value || "No Address Provided";
+            const address = document.getElementById('shippingAddress').value || "Exhibition Counter Pickup";
 
-            const orderHistory = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
-            orderHistory.push({ item, name, address });
-            localStorage.setItem(`${currentBoothId}-orders`, JSON.stringify(orderHistory));
+            if (shoppingCart.length === 0) return;
 
-            alert(`🎉 Order placed successfully!`);
-            document.getElementById('itemClaimed').value = '';
+            // Generate inventory package summary string
+            const summaryString = shoppingCart.map(i => `${i.qty}x ${i.name}`).join(', ');
+            let totalCost = shoppingCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            const orderLogs = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
+            orderLogs.push({ item: summaryString, name, address, revenue: totalCost });
+            localStorage.setItem(`${currentBoothId}-orders`, JSON.stringify(orderLogs));
+
+            alert(`🎉 Invoice Locked! Renter dashboard notified.`);
+            shoppingCart = [];
             document.getElementById('buyerName').value = '';
             document.getElementById('shippingAddress').value = '';
-            
             closeCheckout();
-            loadShopPage(); 
+            loadPremiumShop();
         }
 
-        function clearOrder(index) {
-            const orderHistory = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
-            orderHistory.splice(index, 1);
-            localStorage.setItem(`${currentBoothId}-orders`, JSON.stringify(orderHistory));
-            loadShopPage();
+        function renderDashboardSlips() {
+            const container = document.getElementById('slipsContainer');
+            const orders = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
+            
+            let revenueCounter = 0;
+            orders.forEach(o => revenueCounter += (o.revenue || 0));
+
+            document.getElementById('metricSales').innerText = `$${revenueCounter.toFixed(2)}`;
+            document.getElementById('metricOrdersCount').innerText = orders.length;
+
+            if (orders.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); font-size:13px; margin:0;">No active outgoing packing labels.</p>`;
+                return;
+            }
+
+            container.innerHTML = orders.map((ord, idx) => `
+                <div class="order-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h5 style="margin:0 0 5px 0; color:#fff; font-size:15px; font-family:'Montserrat';">📦 Packing Tag #${idx + 1}</h5>
+                        <span style="color: var(--accent-yellow); font-weight:700;">$${(ord.revenue || 0).toFixed(2)}</span>
+                    </div>
+                    <p style="margin:5px 0; font-size:13px; color:var(--text-muted);"><strong>Items to Pack:</strong> ${ord.item}</p>
+                    <p style="margin:5px 0; font-size:13px; color:var(--text-muted);"><strong>Ship To:</strong> ${ord.name} - ${ord.address}</p>
+                    <button class="back-btn" style="padding:4px 12px; font-size:11px; margin-top:8px;" onclick="shipLabel(${idx})">Complete & Ship</button>
+                </div>
+            `).join('');
         }
 
-        async function startShopStream() {
+        function shipLabel(idx) {
+            const orders = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
+            orders.splice(idx, 1);
+            localStorage.setItem(`${currentBoothId}-orders`, JSON.stringify(orders));
+            loadPremiumShop();
+        }
+
+        async function startShopCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                const videoEl = document.getElementById('shopVideo');
-                if (videoEl) { videoEl.srcObject = stream; }
+                const video = document.getElementById('shopVideo');
+                if (video) video.srcObject = stream;
             } catch (err) {
-                console.error("Camera channel linkage issue", err);
+                console.error("Video element mirror failure", err);
             }
-        }
-
-        function showError(msg) {
-            document.getElementById('shopContent').innerHTML = `
-                <div class="error-message">
-                    <h2>⚠️ Space Unavailable</h2>
-                    <p>${msg}</p>
-                    <a href="marketplace.html" style="color:#2a75d3; font-weight:bold;">Return to Exhibition Floor</a>
-                </div>
-            `;
         }
     </script>
 </body>
