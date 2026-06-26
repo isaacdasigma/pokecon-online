@@ -497,6 +497,79 @@
             localStorage.removeItem(id);
             renderBooth(id);
         }
+        const BACKEND_URL = "https://v3gn6z-8080.csb.app"; // 🌟 Matches your running CodeSandbox exactly
+let targetBoothIdToRent = null;
+let confirmedUserEmail = "";
+
+// Intercept the original "Rent Booth" button action
+function openSecurityGate(boothId) {
+    targetBoothIdToRent = boothId;
+    document.getElementById("securityModal").style.display = "flex";
+    document.getElementById("authSignupStep").style.display = "block";
+    document.getElementById("authVerifyStep").style.display = "none";
+}
+
+function closeSecurityGate() {
+    document.getElementById("securityModal").style.display = "none";
+}
+
+// 📤 Post signup details directly to your live CodeSandbox backend server
+function submitBackendSignup() {
+    const email = document.getElementById("secureEmail").value.trim();
+    const password = document.getElementById("securePassword").value;
+
+    if (!email || !password) {
+        alert("Please fill out all mandatory registration rows.");
+        return;
+    }
+
+    fetch(`${BACKEND_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            confirmedUserEmail = email;
+            // Advance to the 6-digit verification code screen phase layout
+            document.getElementById("authSignupStep").style.display = "none";
+            document.getElementById("authVerifyStep").style.display = "block";
+            alert("Account initialized! Look at your dark green CodeSandbox console log to grab your verification code key.");
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error("Backend pipeline offline", err);
+        alert("Cannot reach backend engine server. Ensure your Sandbox isn't sleeping!");
+    });
+}
+
+// 📥 Send the token back to check if it matches the server's record
+function submitBackendVerification() {
+    const code = document.getElementById("secureToken").value.trim();
+
+    fetch(`${BACKEND_URL}/api/auth/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: confirmedUserEmail, code: code })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("👑 Security Gate Cleared! Verification Identity Authenticated.");
+            closeSecurityGate();
+            
+            // 🔓 SUCCESS: Trigger your original shop creation lease prompt window here!
+            // (Pass your existing frontend layout rent module function name below, e.g.:)
+            openOriginalRentForm(targetBoothIdToRent); 
+        } else {
+            alert("Invalid security token code. Access denied.");
+        }
+    })
+    .catch(err => alert("Verification error occurred."));
+}
     </script>
 </body>
 </html>
