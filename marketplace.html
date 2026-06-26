@@ -69,7 +69,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 200px;
+            min-height: 220px;
         }
         .booth-card:hover {
             transform: translateY(-5px);
@@ -133,6 +133,13 @@
             background-color: #2a75d3;
             color: white;
         }
+        .btn-kick {
+            background-color: #757575;
+            color: white;
+            margin-top: 5px;
+            font-size: 11px;
+            padding: 5px;
+        }
         .rent-booth {
             border: 3px dashed #b0b0b0; 
             background: #fafafa; 
@@ -143,11 +150,11 @@
             align-items: center; 
             padding: 30px;
             border-radius: 12px;
-            min-height: 200px;
+            min-height: 220px;
             box-sizing: border-box;
         }
 
-        /* 🎪 MODAL POP-UP STYLES */
+        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -256,17 +263,9 @@
                 <button class="btn btn-blue">View Inventory</button>
             </div>
 
-            <div class="rent-booth" id="booth-3">
-                <h4 style="color: #757575; margin: 0 0 10px 0;">Booth #03</h4>
-                <p style="font-size: 14px; color: #888; margin: 0 0 15px 0;">Available for rent.</p>
-                <button class="btn" style="background-color: #e3350d; color: white;" onclick="openRentalForm('booth-3')">Rent Here</button>
-            </div>
+            <div id="booth-3-container"></div>
 
-            <div class="rent-booth" id="booth-4">
-                <h4 style="color: #757575; margin: 0 0 10px 0;">Booth #04</h4>
-                <p style="font-size: 14px; color: #888; margin: 0 0 15px 0;">Available for rent.</p>
-                <button class="btn" style="background-color: #e3350d; color: white;" onclick="openRentalForm('booth-4')">Rent Here</button>
-            </div>
+            <div id="booth-4-container"></div>
         </div>
     </div>
 
@@ -307,9 +306,65 @@
 
     <script>
         let targetedBoothId = '';
+        const ONE_HOUR = 60 * 60 * 1000; // 1 hour in milliseconds
 
-        function openRentalForm(boothId) {
-            targetedBoothId = boothId;
+        // Load Booths on page boot up
+        document.addEventListener("DOMContentLoaded", () => {
+            renderBooth('booth-3');
+            renderBooth('booth-4');
+        });
+
+        function renderBooth(id) {
+            const container = document.getElementById(`${id}-container`);
+            const savedData = localStorage.getItem(id);
+
+            if (savedData) {
+                const booth = JSON.parse(savedData);
+                const currentTime = new Date().getTime();
+
+                // ⏰ Timer Check: Kick them out automatically if 1 hour has passed
+                if (currentTime - booth.timestamp > ONE_HOUR) {
+                    localStorage.removeItem(id);
+                    renderEmptyBooth(container, id);
+                } else {
+                    renderOccupiedBooth(container, id, booth);
+                }
+            } else {
+                renderEmptyBooth(container, id);
+            }
+        }
+
+        function renderEmptyBooth(container, id) {
+            const number = id.split('-')[1];
+            container.innerHTML = `
+                <div class="rent-booth">
+                    <h4 style="color: #757575; margin: 0 0 10px 0;">Booth #0${number}</h4>
+                    <p style="font-size: 14px; color: #888; margin: 0 0 15px 0;">Available for rent.</p>
+                    <button class="btn" style="background-color: #e3350d; color: white;" onclick="openRentalForm('${id}')">Rent Here</button>
+                </div>
+            `;
+        }
+
+        function renderOccupiedBooth(container, id, booth) {
+            container.innerHTML = `
+                <div class="booth-card">
+                    <div>
+                        <span class="badge live">🔴 Live Pack Rip</span>
+                        <h4>${booth.shopName}</h4>
+                        <div class="seller-name">by ${booth.trainerName}</div>
+                        <p>${booth.description}</p>
+                        <div class="specialty">${booth.specialty}</div>
+                    </div>
+                    <div>
+                        <button class="btn">Enter Booth</button>
+                        <button class="btn btn-kick" onclick="kickOut('${id}')">Leave Booth (End Rental)</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openRentalForm(id) {
+            targetedBoothId = id;
             document.getElementById('rentalModal').classList.add('active');
         }
 
@@ -322,32 +377,27 @@
             const trainerName = document.getElementById('trainerName').value || "Trainer_Unknown";
             const description = document.getElementById('description').value || "Welcome to my con booth!";
             const specialty = document.getElementById('specialty').value;
+            const timestamp = new Date().getTime(); // Mark the exact rent start time
 
-            const targetElement = document.getElementById(targetedBoothId);
+            const boothData = { shopName, trainerName, description, specialty, timestamp };
+            
+            // Save inside local storage
+            localStorage.setItem(targetedBoothId, JSON.stringify(boothData));
 
-            // Change the dashed rental layout into a real active booth card!
-            targetElement.className = "booth-card";
-            targetElement.style.border = "3px solid #e0e0e0";
-            targetElement.style.background = "white";
-            targetElement.style.textAlign = "left";
-            targetElement.style.display = "flex";
+            // Re-render display
+            renderBooth(targetedBoothId);
 
-            targetElement.innerHTML = `
-                <div>
-                    <span class="badge live">🔴 Live Pack Rip</span>
-                    <h4>${shopName}</h4>
-                    <div class="seller-name">by ${trainerName}</div>
-                    <p>${description}</p>
-                    <div class="specialty">${specialty}</div>
-                </div>
-                <button class="btn">Enter Booth</button>
-            `;
-
-            // Reset form fields and hide pop-up
+            // Clean & Close modal form
             document.getElementById('shopName').value = '';
             document.getElementById('trainerName').value = '';
             document.getElementById('description').value = '';
             closeRentalForm();
+        }
+
+        // Manual Kick Out Button
+        function kickOut(id) {
+            localStorage.removeItem(id);
+            renderBooth(id);
         }
     </script>
 </body>
