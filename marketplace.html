@@ -55,7 +55,7 @@
         }
         .booth-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 25px;
         }
         .booth-card {
@@ -69,7 +69,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 220px;
+            min-height: 380px;
         }
         .booth-card:hover {
             transform: translateY(-5px);
@@ -84,15 +84,12 @@
             font-size: 11px;
             font-weight: bold;
             text-transform: uppercase;
+            z-index: 10;
         }
         .badge.live {
             background-color: #ff0000;
             color: white;
             animation: blink 1.5s infinite;
-        }
-        .badge.offline {
-            background-color: #757575;
-            color: white;
         }
         .booth-card h4 {
             font-family: 'Montserrat', sans-serif;
@@ -110,9 +107,32 @@
             border-radius: 4px;
             font-size: 12px;
             display: inline-block;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             align-self: flex-start;
         }
+        
+        /* 📹 WEBCAM STREAM WINDOW */
+        .webcam-box {
+            width: 100%;
+            height: 160px;
+            background: #000;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        .webcam-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .webcam-error {
+            color: #ffcb05;
+            font-size: 12px;
+            text-align: center;
+            padding: 40px 10px 0 10px;
+        }
+
         .btn {
             display: inline-block;
             background-color: #ffcb05;
@@ -150,7 +170,7 @@
             align-items: center; 
             padding: 30px;
             border-radius: 12px;
-            min-height: 220px;
+            min-height: 380px;
             box-sizing: border-box;
         }
 
@@ -241,30 +261,9 @@
         <h3 class="floor-title">Exhibition Hall A</h3>
         
         <div class="booth-grid" id="gridContainer">
-            <div class="booth-card">
-                <div>
-                    <span class="badge live">🔴 Live Pack Rip</span>
-                    <h4>Paldea Customs</h4>
-                    <div class="seller-name">by Trainer_Alex</div>
-                    <p>Opening brand new Japanese booster boxes live! Grab your slots now.</p>
-                    <div class="specialty">🎯 Japanese Sets</div>
-                </div>
-                <button class="btn">Enter Booth</button>
-            </div>
-
-            <div class="booth-card">
-                <div>
-                    <span class="badge offline">Shop Open</span>
-                    <h4>Kanto Vintage Co.</h4>
-                    <div class="seller-name">by MasterGamer99</div>
-                    <p>Selling raw and graded Base Set, Jungle, and Fossil holo cards.</p>
-                    <div class="specialty">🦖 Vintage (1999)</div>
-                </div>
-                <button class="btn btn-blue">View Inventory</button>
-            </div>
-
+            <div id="booth-1-container"></div>
+            <div id="booth-2-container"></div>
             <div id="booth-3-container"></div>
-
             <div id="booth-4-container"></div>
         </div>
     </div>
@@ -282,7 +281,7 @@
             </div>
             <div class="form-group">
                 <label for="description">What are you doing/selling?</label>
-                <input type="text" id="description" placeholder="e.g., Live chilling and ripping packs!">
+                <input type="text" id="description" placeholder="e.g., Showing off vintage pack breaks!">
             </div>
             <div class="form-group">
                 <label for="specialty">Choose Category Tag</label>
@@ -295,7 +294,7 @@
             </div>
             <div class="modal-actions">
                 <button class="btn btn-blue" onclick="closeRentalForm()">Cancel</button>
-                <button class="btn" style="background-color: #e3350d; color: white;" onclick="submitRentalForm()">Launch Booth!</button>
+                <button class="btn" style="background-color: #e3350d; color: white;" onclick="submitRentalForm()">Start Streaming!</button>
             </div>
         </div>
     </div>
@@ -306,12 +305,13 @@
 
     <script>
         let targetedBoothId = '';
-        const ONE_HOUR = 60 * 60 * 1000; // 1 hour in milliseconds
+        const ONE_HOUR = 60 * 60 * 1000;
+        let activeStreams = {}; // Holds reference to webcam tracks to close them later
 
-        // Load Booths on page boot up
         document.addEventListener("DOMContentLoaded", () => {
-            renderBooth('booth-3');
-            renderBooth('booth-4');
+            for(let i = 1; i <= 4; i++) {
+                renderBooth(`booth-${i}`);
+            }
         });
 
         function renderBooth(id) {
@@ -322,12 +322,12 @@
                 const booth = JSON.parse(savedData);
                 const currentTime = new Date().getTime();
 
-                // ⏰ Timer Check: Kick them out automatically if 1 hour has passed
                 if (currentTime - booth.timestamp > ONE_HOUR) {
                     localStorage.removeItem(id);
                     renderEmptyBooth(container, id);
                 } else {
                     renderOccupiedBooth(container, id, booth);
+                    startWebcam(id); // Fire up webcam stream immediately for the active card
                 }
             } else {
                 renderEmptyBooth(container, id);
@@ -349,18 +349,41 @@
             container.innerHTML = `
                 <div class="booth-card">
                     <div>
-                        <span class="badge live">🔴 Live Pack Rip</span>
+                        <span class="badge live">🔴 Live Stream</span>
                         <h4>${booth.shopName}</h4>
                         <div class="seller-name">by ${booth.trainerName}</div>
-                        <p>${booth.description}</p>
+                        
+                        <div class="webcam-box">
+                            <video id="video-${id}" autoplay playsinline muted></video>
+                        </div>
+
+                        <p style="font-size: 14px; margin: 0 0 10px 0;">${booth.description}</p>
                         <div class="specialty">${booth.specialty}</div>
                     </div>
                     <div>
-                        <button class="btn">Enter Booth</button>
-                        <button class="btn btn-kick" onclick="kickOut('${id}')">Leave Booth (End Rental)</button>
+                        <button class="btn">View Shop</button>
+                        <button class="btn btn-kick" onclick="kickOut('${id}')">End Stream</button>
                     </div>
                 </div>
             `;
+        }
+
+        // 🎥 WEBCAM ACTIVATION LOGIC
+        async function startWebcam(id) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                const videoElement = document.getElementById(`video-${id}`);
+                if (videoElement) {
+                    videoElement.srcObject = stream;
+                    activeStreams[id] = stream; // Store track references
+                }
+            } catch (err) {
+                console.error("Camera access denied or unavailable", err);
+                const videoBox = document.querySelector(`#video-${id}`)?.parentElement;
+                if (videoBox) {
+                    videoBox.innerHTML = `<div class="webcam-error">⚠️ Webcam permission required to stream cards live!</div>`;
+                }
+            }
         }
 
         function openRentalForm(id) {
@@ -377,25 +400,25 @@
             const trainerName = document.getElementById('trainerName').value || "Trainer_Unknown";
             const description = document.getElementById('description').value || "Welcome to my con booth!";
             const specialty = document.getElementById('specialty').value;
-            const timestamp = new Date().getTime(); // Mark the exact rent start time
+            const timestamp = new Date().getTime();
 
             const boothData = { shopName, trainerName, description, specialty, timestamp };
-            
-            // Save inside local storage
             localStorage.setItem(targetedBoothId, JSON.stringify(boothData));
 
-            // Re-render display
             renderBooth(targetedBoothId);
 
-            // Clean & Close modal form
             document.getElementById('shopName').value = '';
             document.getElementById('trainerName').value = '';
             document.getElementById('description').value = '';
             closeRentalForm();
         }
 
-        // Manual Kick Out Button
         function kickOut(id) {
+            // Turn off camera tracks before destroying element
+            if (activeStreams[id]) {
+                activeStreams[id].getTracks().forEach(track => track.stop());
+                delete activeStreams[id];
+            }
             localStorage.removeItem(id);
             renderBooth(id);
         }
