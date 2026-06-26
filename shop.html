@@ -15,6 +15,7 @@
             padding: 0;
             background-color: #f4f4f9;
             color: #222222;
+            padding-bottom: 60px;
         }
         header {
             background-color: #333;
@@ -49,6 +50,7 @@
             box-shadow: 0 6px 15px rgba(0,0,0,0.1);
             padding: 40px;
             border-top: 8px solid #ffcb05;
+            box-sizing: border-box;
         }
         .shop-header-flex {
             display: flex;
@@ -85,6 +87,9 @@
             gap: 30px;
             margin-bottom: 30px;
         }
+        @media (max-width: 768px) {
+            .media-layout { grid-template-columns: 1fr; }
+        }
         .video-feed-large {
             background: #000;
             border-radius: 12px;
@@ -100,19 +105,42 @@
             height: 100%;
             object-fit: cover;
         }
+        
+        /* 🛍️ CLICKABLE IMAGE SHOWCASE BRICKS */
         .image-showcase-large {
             background: #e9e9f0;
             border-radius: 12px;
             height: 300px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            cursor: pointer;
+            border: 3px dashed transparent;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .image-showcase-large:hover {
+            border-color: #e3350d;
+            background: #e1e1e9;
         }
         .image-showcase-large img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+        }
+        .hover-buy-banner {
+            position: absolute;
+            bottom: 0;
+            background: rgba(227, 53, 13, 0.9);
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 8px 0;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
         }
         .specialty-tag {
             background: #f0f4f8;
@@ -123,10 +151,107 @@
             display: inline-block;
             margin-top: 10px;
         }
-        .error-message {
-            text-align: center;
-            padding: 50px 20px;
+
+        /* 📋 ORDERS MANAGEMENT SYSTEM DASHBOARD */
+        .dashboard-panel {
+            margin-top: 40px;
+            background: #fcfcff;
+            border: 2px solid #2a75d3;
+            border-radius: 12px;
+            padding: 25px;
         }
+        .dashboard-panel h3 {
+            margin-top: 0;
+            color: #2a75d3;
+            font-family: 'Montserrat', sans-serif;
+            border-bottom: 2px solid #2a75d3;
+            padding-bottom: 8px;
+        }
+        .order-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-left: 5px solid #ffcb05;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .order-card h5 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #e3350d;
+        }
+
+        /* Modal Overlays */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 4px solid #e3350d;
+        }
+        .modal-content h3 {
+            font-family: 'Montserrat', sans-serif;
+            margin-top: 0;
+            color: #e3350d;
+            text-transform: uppercase;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #ffcb05;
+            color: #222;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 13px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            text-align: center;
+            border: none;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+        .btn-blue { background-color: #2a75d3; color: white; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .error-message { text-align: center; padding: 50px 20px; }
     </style>
 </head>
 <body>
@@ -139,19 +264,55 @@
     <main class="shop-container" id="shopContent">
         </main>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Get the booth ID from the URL string (?id=booth-3)
-            const params = new URLSearchParams(window.location.search);
-            const boothId = params.get('id');
-            const shopContent = document.getElementById('shopContent');
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal-content">
+            <h3>🛒 Place Your Order</h3>
+            <p style="font-size: 13px; color: #555; margin: -5px 0 15px 0;">Claim your card or pack bundle right from the stream display picture.</p>
+            
+            <div class="form-group">
+                <label for="itemClaimed">What are you buying?</label>
+                <input type="text" id="itemClaimed" placeholder="e.g., 1x Base Set Booster Pack / Charizard Single">
+            </div>
+            <div class="form-group">
+                <label for="buyerName">Your Full Name</label>
+                <input type="text" id="buyerName" placeholder="Ash Ketchum">
+            </div>
+            <div class="form-group">
+                <label for="shippingAddress">Shipping Address</label>
+                <textarea id="shippingAddress" rows="3" placeholder="123 Pallet Town Way, Kanto Region, 00124" style="width:100%; border:2px solid #ccc; border-radius:6px; font-family:inherit; padding:8px; box-sizing:border-box;"></textarea>
+            </div>
 
-            if (!boothId) {
+            <div class="modal-actions">
+                <button class="btn btn-blue" onclick="closeCheckout()">Cancel</button>
+                <button class="btn" style="background-color: #e3350d; color: white;" onclick="submitOrder()">Submit Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBoothId = '';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            currentBoothId = params.get('id');
+            loadShopPage();
+
+            // Listen for data updates on other tabs to refresh incoming alerts instantly
+            window.addEventListener('storage', (e) => {
+                if (e.key === currentBoothId || e.key === `${currentBoothId}-orders`) {
+                    loadShopPage();
+                }
+            });
+        });
+
+        function loadShopPage() {
+            const shopContent = document.getElementById('shopContent');
+            if (!currentBoothId) {
                 showError("No store parameters selected.");
                 return;
             }
 
-            const savedData = localStorage.getItem(boothId);
+            const savedData = localStorage.getItem(currentBoothId);
             if (!savedData) {
                 showError("This booth workspace is currently vacant or the rental lease expired.");
                 return;
@@ -159,15 +320,31 @@
 
             const booth = JSON.parse(savedData);
             
-            // Adjust page headers
             document.title = `${booth.shopName} | PokéCon Store`;
             document.getElementById('navHeader').innerText = `🏪 ${booth.shopName}`;
 
-            // Build shop layout
             const badgeClass = booth.isLive ? 'badge live' : 'badge offline';
             const badgeText = booth.isLive ? '🔴 Live Right Now' : 'Shop Open';
             const videoClass = booth.isLive ? 'video-feed-large active-stream' : 'video-feed-large';
-            const imgHtml = booth.image ? `<img src="${booth.image}">` : `<p style="color:#757575;">No display picture</p>`;
+            
+            const imgHtml = booth.image 
+                ? `<img src="${booth.image}"><div class="hover-buy-banner">✨ Click Image to Buy Items!</div>` 
+                : `<p style="color:#757575; padding: 20px; text-align:center;">No display picture uploaded.<br>(Renter must upload showcase image to activate checkout features)</p>`;
+
+            // Pull current orders for this store
+            const orderHistory = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
+            let ordersHtml = `<p style="color:#666; font-size:14px;">No incoming orders yet.</p>`;
+            
+            if (orderHistory.length > 0) {
+                ordersHtml = orderHistory.map((ord, index) => `
+                    <div class="order-card">
+                        <h5>📦 Order #${index + 1}: ${ord.item}</h5>
+                        <p style="margin: 4px 0; font-size: 14px;"><strong>Buyer:</strong> ${ord.name}</p>
+                        <p style="margin: 4px 0; font-size: 14px;"><strong>Ship To Address:</strong> ${ord.address}</p>
+                        <button class="btn" style="padding: 4px 10px; font-size: 11px; width: auto; background: #ccc; margin-top: 5px;" onclick="clearOrder(${index})">Mark as Shipped</button>
+                    </div>
+                `).join('');
+            }
 
             shopContent.innerHTML = `
                 <div class="shop-header-flex">
@@ -183,31 +360,72 @@
                         <video id="shopVideo" autoplay playsinline muted></video>
                     </div>
                     
-                    <div class="image-showcase-large">
+                    <div class="image-showcase-large" onclick="openCheckout(${booth.image ? true : false})">
                         ${imgHtml}
                     </div>
                 </div>
 
                 <h3>About Our Shop</h3>
-                <p style="font-size: 16px; line-height: 1.6; color:#333;">${booth.description}</p>
+                <p style="font-size: 16px; line-height: 1.6; color:#333; margin-bottom: 20px;">${booth.description}</p>
                 <div class="specialty-tag">${booth.specialty}</div>
+
+                <div class="dashboard-panel">
+                    <h3>👑 Renter Live Dashboard: Incoming Orders</h3>
+                    <p style="font-size: 13px; color: #555; margin-top: -5px;">Keep this panel open! When buyers fill out forms, item info and shipment tags generate here live.</p>
+                    <div id="ordersListContainer">
+                        ${ordersHtml}
+                    </div>
+                </div>
             `;
 
-            // If the booth is running a stream, grab camera to mirror on the storefront page
             if (booth.isLive) {
                 startShopStream();
             }
-        });
+        }
+
+        function openCheckout(hasImage) {
+            if (!hasImage) return; // Can't buy if there's no item visual posted
+            document.getElementById('checkoutModal').classList.add('active');
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkoutModal').classList.remove('active');
+        }
+
+        function submitOrder() {
+            const item = document.getElementById('itemClaimed').value || "Mystery Pack Lot";
+            const name = document.getElementById('buyerName').value || "Anonymous Collector";
+            const address = document.getElementById('shippingAddress').value || "No Address Provided";
+
+            // Push order into list
+            const orderHistory = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
+            orderHistory.push({ item, name, address });
+            localStorage.setItem(`${currentBoothId}-orders`, JSON.stringify(orderHistory));
+
+            // Alert user and clean up setup
+            alert(`🎉 Order placed successfully! The booth renter has been updated.`);
+            document.getElementById('itemClaimed').value = '';
+            document.getElementById('buyerName').value = '';
+            document.getElementById('shippingAddress').value = '';
+            
+            closeCheckout();
+            loadShopPage(); // Re-render window items
+        }
+
+        function clearOrder(index) {
+            const orderHistory = JSON.parse(localStorage.getItem(`${currentBoothId}-orders`)) || [];
+            orderHistory.splice(index, 1);
+            localStorage.setItem(`${currentBoothId}-orders`, JSON.stringify(orderHistory));
+            loadShopPage();
+        }
 
         async function startShopStream() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 const videoEl = document.getElementById('shopVideo');
-                if (videoEl) {
-                    videoEl.srcObject = stream;
-                }
+                if (videoEl) { videoEl.srcObject = stream; }
             } catch (err) {
-                console.error("Could not link active camera stream to storefront view.", err);
+                console.error("Camera channel linkage issue", err);
             }
         }
 
