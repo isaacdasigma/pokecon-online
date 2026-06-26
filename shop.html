@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéCon Online | Storefront</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gill+Sans+MT:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #222222;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            margin: 0;
+            font-size: 24px;
+            text-transform: uppercase;
+        }
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            background: #2a75d3;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+        .shop-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-top: 8px solid #ffcb05;
+        }
+        .shop-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .shop-title h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 32px;
+            margin: 0 0 5px 0;
+            color: #2a75d3;
+        }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .badge.live {
+            background-color: #ff0000;
+            color: white;
+        }
+        .badge.offline {
+            background-color: #757575;
+            color: white;
+        }
+        .media-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .video-feed-large {
+            background: #000;
+            border-radius: 12px;
+            height: 300px;
+            overflow: hidden;
+            display: none;
+        }
+        .video-feed-large.active-stream {
+            display: block;
+        }
+        .video-feed-large video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-showcase-large {
+            background: #e9e9f0;
+            border-radius: 12px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .image-showcase-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .specialty-tag {
+            background: #f0f4f8;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .error-message {
+            text-align: center;
+            padding: 50px 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 id="navHeader">🏪 Con Storefront</h1>
+        <a href="marketplace.html" class="back-btn">⬅️ Exit to Floor</a>
+    </header>
+
+    <main class="shop-container" id="shopContent">
+        </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Get the booth ID from the URL string (?id=booth-3)
+            const params = new URLSearchParams(window.location.search);
+            const boothId = params.get('id');
+            const shopContent = document.getElementById('shopContent');
+
+            if (!boothId) {
+                showError("No store parameters selected.");
+                return;
+            }
+
+            const savedData = localStorage.getItem(boothId);
+            if (!savedData) {
+                showError("This booth workspace is currently vacant or the rental lease expired.");
+                return;
+            }
+
+            const booth = JSON.parse(savedData);
+            
+            // Adjust page headers
+            document.title = `${booth.shopName} | PokéCon Store`;
+            document.getElementById('navHeader').innerText = `🏪 ${booth.shopName}`;
+
+            // Build shop layout
+            const badgeClass = booth.isLive ? 'badge live' : 'badge offline';
+            const badgeText = booth.isLive ? '🔴 Live Right Now' : 'Shop Open';
+            const videoClass = booth.isLive ? 'video-feed-large active-stream' : 'video-feed-large';
+            const imgHtml = booth.image ? `<img src="${booth.image}">` : `<p style="color:#757575;">No display picture</p>`;
+
+            shopContent.innerHTML = `
+                <div class="shop-header-flex">
+                    <div class="shop-title">
+                        <h2>${booth.shopName}</h2>
+                        <div style="color: #666; font-size:16px;">Managed by <strong>${booth.trainerName}</strong></div>
+                    </div>
+                    <span class="${badgeClass}">${badgeText}</span>
+                </div>
+
+                <div class="media-layout">
+                    <div class="${videoClass}">
+                        <video id="shopVideo" autoplay playsinline muted></video>
+                    </div>
+                    
+                    <div class="image-showcase-large">
+                        ${imgHtml}
+                    </div>
+                </div>
+
+                <h3>About Our Shop</h3>
+                <p style="font-size: 16px; line-height: 1.6; color:#333;">${booth.description}</p>
+                <div class="specialty-tag">${booth.specialty}</div>
+            `;
+
+            // If the booth is running a stream, grab camera to mirror on the storefront page
+            if (booth.isLive) {
+                startShopStream();
+            }
+        });
+
+        async function startShopStream() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                const videoEl = document.getElementById('shopVideo');
+                if (videoEl) {
+                    videoEl.srcObject = stream;
+                }
+            } catch (err) {
+                console.error("Could not link active camera stream to storefront view.", err);
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('shopContent').innerHTML = `
+                <div class="error-message">
+                    <h2>⚠️ Space Unavailable</h2>
+                    <p>${msg}</p>
+                    <a href="marketplace.html" style="color:#2a75d3; font-weight:bold;">Return to Exhibition Floor</a>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
