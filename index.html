@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokéCon Online | The Ultimate Virtual TCG Experience</title>
+    <title>PokéCon Online | Main Lobby</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Gill+Sans+MT:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
@@ -15,10 +15,9 @@
             padding: 0;
             background-color: #f4f4f9;
             color: #222222;
-            padding-bottom: 80px; /* Prevents footer from covering content */
         }
         header {
-            background-color: #e3350d; /* Pokémon Red */
+            background-color: #e3350d;
             color: white;
             padding: 20px;
             display: flex;
@@ -44,7 +43,7 @@
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80') center/cover;
             color: white;
             text-align: center;
-            padding: 80px 20px;
+            padding: 100px 20px;
         }
         .hero h2 {
             font-family: 'Montserrat', sans-serif;
@@ -53,170 +52,93 @@
             margin-bottom: 10px;
             text-transform: uppercase;
         }
-        
-        /* Marketplace / Exhibition Floor Styles */
-        .floor-container {
+        .features {
+            display: flex;
+            justify-content: space-around;
+            padding: 50px 20px;
             max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
+            margin: 0 auto;
         }
-        .floor-title {
-            font-family: 'Montserrat', sans-serif;
-            color: #2a75d3;
-            text-transform: uppercase;
-            border-bottom: 3px solid #ffcb05;
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-        }
-        .booth-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-        }
-        .booth-card {
+        .card {
             background: white;
-            border: 3px solid #e0e0e0;
+            border: 4px solid #f1f1f1;
             border-radius: 12px;
-            padding: 20px;
-            position: relative;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 24px;
+            width: 28%;
+            text-align: center;
             transition: transform 0.2s;
         }
-        .booth-card:hover {
+        .card:hover {
             transform: translateY(-5px);
-            border-color: #2a75d3;
         }
-        .badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
+        .card h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: #2a75d3;
+            font-size: 20px;
+            margin-top: 0;
             text-transform: uppercase;
         }
-        .badge.live {
-            background-color: #ff0000;
-            color: white;
-            animation: blink 1.5s infinite;
-        }
-        .badge.offline {
-            background-color: #757575;
-            color: white;
-        }
-        .booth-card h4 {
-            font-family: 'Montserrat', sans-serif;
-            margin: 10px 0 5px 0;
-            font-size: 18px;
-        }
-        .seller-name {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-        .specialty {
-            background: #f0f4f8;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-
-        /* Global Buttons */
         .btn {
             display: inline-block;
-            background-color: #ffcb05; /* Pokémon Yellow */
+            background-color: #ffcb05;
             color: #222;
-            padding: 10px 20px;
+            padding: 12px 24px;
             text-decoration: none;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 14px;
             border-radius: 6px;
+            margin-top: 15px;
             text-transform: uppercase;
-            text-align: center;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            box-sizing: border-box;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
-        .btn-blue {
-            background-color: #2a75d3;
-            color: white;
-        }
-
         footer {
             background-color: #333;
             color: white;
             text-align: center;
-            padding: 15px;
+            padding: 20px;
             position: fixed;
             bottom: 0;
             width: 100%;
-        }
-
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🌐 PokéCon Online</h1>
+        <h1>🌐 PokéCon Online Lobby</h1>
         <nav>
-            <a href="#floor">Marketplace</a>
+            <a href="marketplace.html">Marketplace</a>
             <a href="#">Binders</a>
             <a href="#">Battle Arena</a>
         </nav>
     </header>
 
     <section class="hero">
-        <h2>The Physical Card Con, Completely Online.</h2>
-        <p style="font-size: 18px;">Rent a booth, rip packs live, show off your collection, and scan your cards to battle globally.</p>
+        <h2>Welcome to PokéCon Online</h2>
+        <p style="font-size: 18px;">Select a hall below to begin your virtual TCG convention adventure.</p>
     </section>
 
-    <div class="floor-container" id="floor">
-        <h3 class="floor-title">🏪 Live Exhibition Floor</h3>
-        
-        <div class="booth-grid">
-            <div class="booth-card">
-                <span class="badge live">🔴 Live Pack Rip</span>
-                <h4>Paldea Customs</h4>
-                <div class="seller-name">by Trainer_Alex</div>
-                <p>Opening brand new Japanese booster boxes live! Grab your slots now.</p>
-                <div class="specialty">🎯 Japanese Sets</div>
-                <a href="#" class="btn">Enter Booth</a>
-            </div>
-
-            <div class="booth-card">
-                <span class="badge offline">Shop Open</span>
-                <h4>Kanto Vintage Co.</h4>
-                <div class="seller-name">by MasterGamer99</div>
-                <p>Selling raw and graded Base Set, Jungle, and Fossil holo cards.</p>
-                <div class="specialty">🦖 Vintage (1999-2000)</div>
-                <a href="#" class="btn btn-blue">View Inventory</a>
-            </div>
-
-            <div class="booth-card">
-                <span class="badge live">🔴 Live Pack Rip</span>
-                <h4>The Card Cavern</h4>
-                <div class="seller-name">by PokeBreaks_UK</div>
-                <p>Bounty night! Hit a Secret Rare and win extra free booster packs.</p>
-                <div class="specialty">⚔️ Modern TCG</div>
-                <a href="#" class="btn">Enter Booth</a>
-            </div>
-
-            <div class="booth-card" style="border: 3px dashed #b0b0b0; background: #fafafa; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px;">
-                <h4 style="color: #757575;">Booth Space #04 Available</h4>
-                <p style="font-size: 14px; color: #888;">Want to sell your own cards or stream live to the con?</p>
-                <a href="#" class="btn" style="background-color: #e3350d; color: white; width: auto;">Rent This Booth</a>
-            </div>
+    <section class="features">
+        <div class="card">
+            <h3>🏪 Live Marketplace</h3>
+            <p>Rent a virtual booth, stream your pack openings, and sell singles securely to collectors worldwide.</p>
+            <a href="marketplace.html" class="btn" style="background-color: #e3350d; color: white;">Go to Marketplace</a>
         </div>
-    </div>
+
+        <div class="card">
+            <h3>📖 Binder Showroom</h3>
+            <p>Upload your digital card binder. Let people flip through your pages, leave likes, and send trade offers.</p>
+            <a href="#" class="btn" style="background-color: #e3350d; color: white;">Enter Showroom</a>
+        </div>
+
+        <div class="card">
+            <h3>⚔️ Scanner & Battle Arena</h3>
+            <p>Scan your real-life physical cards into your profile and face off against other trainers in real-time.</p>
+            <a href="#" class="btn" style="background-color: #e3350d; color: white;">Enter Arena</a>
+        </div>
+    </section>
 
     <footer>
         <p>&copy; 2026 PokéCon Online Concept</p>
