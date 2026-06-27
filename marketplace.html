@@ -6,7 +6,7 @@
     <title>PokéCon Online | Live Exhibition Floor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gill+Sans+MT:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gill+Sans+MT:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
         body {
@@ -371,7 +371,8 @@
         const ONE_HOUR = 60 * 60 * 1000;
         let activeStreams = {};
         
-      const BACKEND_URL = "https://v3gn6z-8080.csb.app"; // 🌟 Points directly to your cloud backend
+        // 🌟 Points directly to your cloud engine backend instance on CodeSandbox
+        const BACKEND_URL = "https://v3gn6z-8080.csb.app"; 
         let targetBoothIdToRent = null;
         let confirmedUserEmail = "";
 
@@ -383,20 +384,26 @@
 
         function renderBooth(id) {
             const container = document.getElementById(`${id}-container`);
+            if (!container) return;
+            
             const savedData = localStorage.getItem(id);
 
             if (savedData) {
-                const booth = JSON.parse(savedData);
-                const currentTime = new Date().getTime();
+                try {
+                    const booth = JSON.parse(savedData);
+                    const currentTime = new Date().getTime();
 
-                if (currentTime - booth.timestamp > ONE_HOUR) {
-                    localStorage.removeItem(id);
-                    renderEmptyBooth(container, id);
-                } else {
-                    renderOccupiedBooth(container, id, booth);
-                    if (booth.isLive) {
-                        startWebcam(id);
+                    if (currentTime - booth.timestamp > ONE_HOUR) {
+                        localStorage.removeItem(id);
+                        renderEmptyBooth(container, id);
+                    } else {
+                        renderOccupiedBooth(container, id, booth);
+                        if (booth.isLive) {
+                            startWebcam(id);
+                        }
                     }
+                } catch(e) {
+                    renderEmptyBooth(container, id);
                 }
             } else {
                 renderEmptyBooth(container, id);
@@ -533,7 +540,6 @@
             renderBooth(id);
         }
 
-        // Intercept the original "Rent Booth" button action
         function openSecurityGate(boothId) {
             targetBoothIdToRent = boothId;
             document.getElementById("securityModal").style.display = "flex";
@@ -545,7 +551,6 @@
             document.getElementById("securityModal").style.display = "none";
         }
 
-        // 📤 Post signup details directly to your live CodeSandbox backend server
         function submitBackendSignup() {
             const email = document.getElementById("secureEmail").value.trim();
             const password = document.getElementById("securePassword").value;
@@ -564,7 +569,6 @@
             .then(data => {
                 if (data.success) {
                     confirmedUserEmail = email;
-                    // Advance to the 6-digit verification code screen phase layout
                     document.getElementById("authSignupStep").style.display = "none";
                     document.getElementById("authVerifyStep").style.display = "block";
                     alert("Account initialized! Look at your dark green CodeSandbox console log to grab your verification code key.");
@@ -578,7 +582,6 @@
             });
         }
 
-        // 📥 Send the token back to check if it matches the server's record
         function submitBackendVerification() {
             const code = document.getElementById("secureToken").value.trim();
 
@@ -592,8 +595,6 @@
                 if (data.success) {
                     alert("👑 Security Gate Cleared! Verification Identity Authenticated.");
                     closeSecurityGate();
-                    
-                    // 🔓 SUCCESS: Open the original rental form modal
                     openRentalForm(targetBoothIdToRent); 
                 } else {
                     alert("Invalid security token code. Access denied.");
