@@ -106,7 +106,6 @@
             display: inline-block;
             margin-bottom: 12px;
         }
-        
         .showcase-box {
             width: 100%;
             height: 160px;
@@ -131,7 +130,6 @@
             margin-bottom: 4px;
             display: block;
         }
-
         .btn {
             display: inline-block;
             background-color: #ffcb05;
@@ -172,8 +170,6 @@
             min-height: 380px;
             box-sizing: border-box;
         }
-
-        /* MODALS */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -225,7 +221,6 @@
             box-sizing: border-box;
             font-family: inherit;
         }
-
         footer {
             background-color: #333;
             color: white;
@@ -330,56 +325,60 @@
     </footer>
 
     <script>
+        // ⚠️ REPLACE THIS WITH YOUR BIN URL FROM NPOINT.IO
+        const CLOUD_BIN_URL = "https://api.npoint.io/49c87fd5a4c0937507e3";
+
         let targetedBoothId = '';
         const ONE_HOUR = 60 * 60 * 1000;
         let targetBoothIdToRent = null;
         let generatedVerificationCode = "";
-
-        // Sync updates across browser tabs
-        const channel = window.BroadcastChannel ? new BroadcastChannel('pokecon_sync') : null;
-        if (channel) {
-            channel.onmessage = (event) => {
-                if (event.data && event.data.boothId) {
-                    renderBooth(event.data.boothId);
-                }
-            };
-        }
-
-        function notifyTabSync(boothId) {
-            if (channel) {
-                channel.postMessage({ boothId });
-            }
-        }
+        let currentCloudState = {};
 
         document.addEventListener("DOMContentLoaded", () => {
-            for(let i = 1; i <= 4; i++) {
-                renderBooth(`booth-${i}`);
-            }
+            fetchCloudBooths();
+            // Poll for updates every 4 seconds so all Chromebooks stay in sync
+            setInterval(fetchCloudBooths, 4000);
         });
 
-        function renderBooth(id) {
-            const container = document.getElementById(`${id}-container`);
-            if (!container) return;
-            
-            const savedData = localStorage.getItem(id);
+        async function fetchCloudBooths() {
+            try {
+                const response = await fetch(CLOUD_BIN_URL);
+                if (!response.ok) return;
+                currentCloudState = await response.json() || {};
 
-            if (savedData) {
-                try {
-                    const booth = JSON.parse(savedData);
-                    const currentTime = new Date().getTime();
+                for (let i = 1; i <= 4; i++) {
+                    const id = `booth-${i}`;
+                    const container = document.getElementById(`${id}-container`);
+                    if (!container) continue;
 
-                    // Check for booth expiration (1 hour rental)
-                    if (currentTime - booth.timestamp > ONE_HOUR) {
-                        localStorage.removeItem(id);
-                        renderEmptyBooth(container, id);
+                    const boothData = currentCloudState[id];
+
+                    if (boothData) {
+                        const currentTime = new Date().getTime();
+                        if (currentTime - boothData.timestamp > ONE_HOUR) {
+                            kickOut(id);
+                        } else {
+                            renderOccupiedBooth(container, id, boothData);
+                        }
                     } else {
-                        renderOccupiedBooth(container, id, booth);
+                        renderEmptyBooth(container, id);
                     }
-                } catch(e) {
-                    renderEmptyBooth(container, id);
                 }
-            } else {
-                renderEmptyBooth(container, id);
+            } catch(e) {
+                console.error("Cloud fetch error:", e);
+            }
+        }
+
+        async function saveCloudBooths(updatedState) {
+            try {
+                await fetch(CLOUD_BIN_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedState)
+                });
+                fetchCloudBooths();
+            } catch(e) {
+                console.error("Cloud save error:", e);
             }
         }
 
@@ -441,10 +440,10 @@
 
             const processAndSave = (imgBase64 = null) => {
                 const boothData = { shopName, trainerName, description, specialty, timestamp, image: imgBase64 };
-                localStorage.setItem(targetedBoothId, JSON.stringify(boothData));
                 
-                notifyTabSync(targetedBoothId);
-                renderBooth(targetedBoothId);
+                // Update cloud storage state
+                currentCloudState[targetedBoothId] = boothData;
+                saveCloudBooths(currentCloudState);
                 
                 document.getElementById('shopName').value = '';
                 document.getElementById('trainerName').value = '';
@@ -455,9 +454,7 @@
 
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    processAndSave(e.target.result);
-                };
+                reader.onload = function(e) { processAndSave(e.target.result); };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
                 processAndSave();
@@ -465,9 +462,8 @@
         }
 
         function kickOut(id) {
-            localStorage.removeItem(id);
-            notifyTabSync(id);
-            renderBooth(id);
+            delete currentCloudState[id];
+            saveCloudBooths(currentCloudState);
         }
 
         function openSecurityGate(boothId) {
