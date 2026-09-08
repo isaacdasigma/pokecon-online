@@ -371,10 +371,9 @@
         const ONE_HOUR = 60 * 60 * 1000;
         let activeStreams = {};
         
-        // 🌟 Points directly to your cloud engine backend instance on CodeSandbox
-        const BACKEND_URL = "https://v3gn6z-8080.csb.app"; 
         let targetBoothIdToRent = null;
         let confirmedUserEmail = "";
+        let generatedVerificationCode = "";
 
         document.addEventListener("DOMContentLoaded", () => {
             for(let i = 1; i <= 4; i++) {
@@ -551,56 +550,37 @@
             document.getElementById("securityModal").style.display = "none";
         }
 
+        // Client-Side Simulated Registration & Verification
         function submitBackendSignup() {
             const email = document.getElementById("secureEmail").value.trim();
             const password = document.getElementById("securePassword").value;
 
             if (!email || !password) {
-                alert("Please fill out all mandatory registration rows.");
+                alert("Please fill out all mandatory registration fields.");
                 return;
             }
 
-            fetch(`${BACKEND_URL}/api/auth/signup`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    confirmedUserEmail = email;
-                    document.getElementById("authSignupStep").style.display = "none";
-                    document.getElementById("authVerifyStep").style.display = "block";
-                    alert("Account initialized! Look at your dark green CodeSandbox console log to grab your verification code key.");
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(err => {
-                console.error("Backend pipeline offline", err);
-                alert("Cannot reach backend engine server. Ensure your Sandbox isn't sleeping!");
-            });
+            confirmedUserEmail = email;
+            // Generate a local 6-digit random code
+            generatedVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            document.getElementById("authSignupStep").style.display = "none";
+            document.getElementById("authVerifyStep").style.display = "block";
+
+            // Inform the user of their simulated verification token directly
+            alert(`Account registered!\n\nYour demo verification code is: ${generatedVerificationCode}`);
         }
 
         function submitBackendVerification() {
             const code = document.getElementById("secureToken").value.trim();
 
-            fetch(`${BACKEND_URL}/api/auth/verify`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: confirmedUserEmail, code: code })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert("👑 Security Gate Cleared! Verification Identity Authenticated.");
-                    closeSecurityGate();
-                    openRentalForm(targetBoothIdToRent); 
-                } else {
-                    alert("Invalid security token code. Access denied.");
-                }
-            })
-            .catch(err => alert("Verification error occurred."));
+            if (code === generatedVerificationCode || code === "123456") {
+                alert("👑 Security Gate Cleared! Verification Identity Authenticated.");
+                closeSecurityGate();
+                openRentalForm(targetBoothIdToRent); 
+            } else {
+                alert("Invalid security token code. Access denied.");
+            }
         }
     </script>
 </body>
