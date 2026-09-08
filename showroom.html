@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéCon Online | Card Showroom</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gill+Sans+MT:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #222222;
+            padding-bottom: 80px;
+        }
+        header {
+            background-color: #2a75d3;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            margin: 0;
+            font-size: 24px;
+            text-transform: uppercase;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .hero-banner {
+            background: linear-gradient(135deg, #e3350d 0%, #b32400 100%);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 5px solid #ffcb05;
+        }
+        .hero-banner h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 28px;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+        .hero-banner p {
+            font-size: 16px;
+            max-width: 650px;
+            margin: 0 auto;
+            color: #ffd2c7;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        /* Controls & Action Section */
+        .controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 18px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .search-box {
+            flex: 1;
+            min-width: 220px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background: #e9e9f0;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: #e3350d;
+            color: white;
+        }
+        .submit-trigger-btn {
+            background-color: #ffcb05;
+            color: #222;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 13px;
+            box-shadow: 0 3px 0 #d1a600;
+            transition: transform 0.1s, background 0.2s;
+        }
+        .submit-trigger-btn:hover {
+            background-color: #f0be00;
+            transform: translateY(-2px);
+        }
+        /* Showroom Card Grid */
+        .showroom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .showcase-card {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .showcase-card:hover {
+            transform: translateY(-5px);
+            border-color: #e3350d;
+        }
+        .card-img-container {
+            width: 100%;
+            height: 260px;
+            background-color: #1a1a24;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .card-img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+        .showcase-card:hover .card-img-container img {
+            transform: scale(1.05);
+        }
+        .tag-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background-color: #ffcb05;
+            color: #222;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .card-body {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+        .card-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 18px;
+            margin: 0 0 4px 0;
+            color: #222;
+        }
+        .trainer-byline {
+            font-size: 13px;
+            color: #2a75d3;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .card-story {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            background: #f8f8fc;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #2a75d3;
+        }
+        .card-footer-action {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee;
+            padding-top: 12px;
+        }
+        .flex-btn {
+            background-color: #f0f4f8;
+            border: 2px solid #2a75d3;
+            color: #2a75d3;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .flex-btn:hover {
+            background-color: #2a75d3;
+            color: white;
+        }
+        /* Modal Form */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 440px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 4px solid #e3350d;
+        }
+        .modal-content h3 {
+            font-family: 'Montserrat', sans-serif;
+            margin-top: 0;
+            color: #e3350d;
+            text-transform: uppercase;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 9px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 13px;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏆 PokéCon Showroom</h1>
+        <nav>
+            <a href="index.html">🎪 Floor Plan</a>
+            <a href="market.html">🛒 Deals Hub</a>
+        </nav>
+    </header>
+
+    <div class="hero-banner">
+        <h2>🔥 The Ultimate Grail Card Gallery</h2>
+        <p>Show off your prized pulls, rare slabs, vintage holographic cards, or favorite custom artworks with the rest of PokéCon!</p>
+    </div>
+
+    <div class="container">
+
+        <!-- Controls: Search, Filters & Post Button -->
+        <div class="controls-bar">
+            <button class="submit-trigger-btn" onclick="openShowroomModal()">📸 Flex Your Card</button>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Search card name or trainer..." onkeyup="filterShowcase()">
+            </div>
+
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="setCategory('all', this)">All Cards</button>
+                <button class="filter-btn" onclick="setCategory('graded', this)">Slabs / Graded</button>
+                <button class="filter-btn" onclick="setCategory('vintage', this)">Vintage 1999</button>
+                <button class="filter-btn" onclick="setCategory('altart', this)">Alt Art / Secret</button>
+            </div>
+        </div>
+
+        <!-- Showroom Cards Display Grid -->
+        <div class="showroom-grid" id="showroomGrid">
+            <!-- Cards render here dynamically -->
+        </div>
+
+    </div>
+
+    <!-- SHOWROOM SUBMISSION MODAL -->
+    <div class="modal-overlay" id="showroomModal">
+        <div class="modal-content">
+            <h3>🏆 Submit to Hall of Fame</h3>
+            <div class="form-group">
+                <label for="cardTitle">Card Name</label>
+                <input type="text" id="cardTitle" placeholder="e.g., Charizard Gold Star #100">
+            </div>
+            <div class="form-group">
+                <label for="trainerName">Trainer / Collector Name</label>
+                <input type="text" id="trainerName" placeholder="e.g., Red_Master">
+            </div>
+            <div class="form-group">
+                <label for="rarityCategory">Category Tag</label>
+                <select id="rarityCategory">
+                    <option value="graded">💎 PSA / BGS Graded Slab</option>
+                    <option value="vintage">🦖 Vintage (1999-2003)</option>
+                    <option value="altart">✨ Alt Art / Secret Rare</option>
+                    <option value="shiny">🔥 Full Art / Shiny</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cardStory">Card Story or Pull Note</label>
+                <textarea id="cardStory" rows="2" placeholder="e.g., Pulled from my very first pack back in 2021!"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="cardImage">📸 Upload Card Photo</label>
+                <input type="file" id="cardImage" accept="image/*">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button style="width:50%; background:#2a75d3; color:white; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="closeShowroomModal()">Cancel</button>
+                <button style="width:50%; background:#e3350d; color:white; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="submitShowroomCard()">Post Card</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 PokéCon Online Concept</p>
+    </footer>
+
+    <script>
+        // ⚠️ PASTE YOUR NPOINT.IO BIN URL HERE (Use a new Bin or the same Bin URL from index.html!)
+        const SHOWROOM_BIN_URL = "https://api.npoint.io/YOUR_NPOINT_BIN_URL";
+
+        let showroomData = [];
+        let currentFilter = 'all';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchShowroomData();
+            // Refresh grid every 4 seconds to catch new posts live across Chromebooks
+            setInterval(fetchShowroomData, 4000);
+        });
+
+        async function fetchShowroomData() {
+            try {
+                const response = await fetch(SHOWROOM_BIN_URL);
+                if (!response.ok) return;
+                const result = await response.json();
+                
+                // If storing inside an object key or standard array
+                showroomData = Array.isArray(result.showroom) ? result.showroom : (result.showroom || []);
+                renderShowroomGrid();
+            } catch(e) {
+                console.error("Showroom fetch error:", e);
+            }
+        }
+
+        async function saveShowroomData() {
+            try {
+                await fetch(SHOWROOM_BIN_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ showroom: showroomData })
+                });
+                renderShowroomGrid();
+            } catch(e) {
+                console.error("Showroom save error:", e);
+            }
+        }
+
+        function renderShowroomGrid() {
+            const grid = document.getElementById('showroomGrid');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            grid.innerHTML = '';
+
+            if (showroomData.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; background: white; border-radius: 12px; color: #888;">
+                    <h3>No cards showcased yet!</h3>
+                    <p>Be the first to click "📸 Flex Your Card" above and add your favourite pull!</p>
+                </div>`;
+                return;
+            }
+
+            showroomData.forEach((item, index) => {
+                const matchesCategory = (currentFilter === 'all') || item.category === currentFilter;
+                const matchesSearch = item.title.toLowerCase().includes(searchVal) || item.trainer.toLowerCase().includes(searchVal);
+
+                if (matchesCategory && matchesSearch) {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'showcase-card';
+
+                    const imageHtml = item.image 
+                        ? `<img src="${item.image}" alt="${item.title}">` 
+                        : `<p style="color:#aaa; font-size:12px;">No Image Uploaded</p>`;
+
+                    cardElement.innerHTML = `
+                        <div class="card-img-container">
+                            <span class="tag-badge">${getCategoryTagLabel(item.category)}</span>
+                            ${imageHtml}
+                        </div>
+                        <div class="card-body">
+                            <div>
+                                <h3 class="card-title">${item.title}</h3>
+                                <div class="trainer-byline">Owner: ${item.trainer}</div>
+                                <div class="card-story">"${item.story}"</div>
+                            </div>
+                            <div class="card-footer-action">
+                                <button class="flex-btn" onclick="upvoteCard(${index})">
+                                    🔥 Flex <span style="background:#2a75d3; color:white; padding:2px 6px; border-radius:10px; font-size:11px;">${item.flexes || 0}</span>
+                                </button>
+                                <span style="font-size:11px; color:#aaa;">ID #${index + 101}</span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(cardElement);
+                }
+            });
+        }
+
+        function getCategoryTagLabel(cat) {
+            switch(cat) {
+                case 'graded': return '💎 PSA / BGS';
+                case 'vintage': return '🦖 Vintage';
+                case 'altart': return '✨ Alt Art';
+                case 'shiny': return '🔥 Full Art';
+                default: return '⭐ Showcase';
+            }
+        }
+
+        function openShowroomModal() {
+            document.getElementById('showroomModal').classList.add('active');
+        }
+
+        function closeShowroomModal() {
+            document.getElementById('showroomModal').classList.remove('active');
+        }
+
+        function submitShowroomCard() {
+            const title = document.getElementById('cardTitle').value.trim() || "Mystery Card";
+            const trainer = document.getElementById('trainerName').value.trim() || "Anonymous Trainer";
+            const category = document.getElementById('rarityCategory').value;
+            const story = document.getElementById('cardStory').value.trim() || "Proud member of my collection!";
+            const fileInput = document.getElementById('cardImage');
+
+            const saveEntry = (imageBase64 = null) => {
+                const newEntry = {
+                    title: title,
+                    trainer: trainer,
+                    category: category,
+                    story: story,
+                    image: imageBase64,
+                    flexes: 0,
+                    timestamp: new Date().getTime()
+                };
+
+                showroomData.unshift(newEntry); // Add to beginning of array
+                saveShowroomData();
+
+                // Clear Form
+                document.getElementById('cardTitle').value = '';
+                document.getElementById('trainerName').value = '';
+                document.getElementById('cardStory').value = '';
+                fileInput.value = '';
+                closeShowroomModal();
+            };
+
+            // Image Compression function to keep npoint payload lightweight
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 450;
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        saveEntry(compressedBase64);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                saveEntry();
+            }
+        }
+
+        function upvoteCard(index) {
+            if (showroomData[index]) {
+                showroomData[index].flexes = (showroomData[index].flexes || 0) + 1;
+                saveShowroomData();
+            }
+        }
+
+        function setCategory(category, element) {
+            currentFilter = category;
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            renderShowroomGrid();
+        }
+
+        function filterShowcase() {
+            renderShowroomGrid();
+        }
+    </script>
+</body>
+</html>
