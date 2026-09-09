@@ -464,19 +464,19 @@
     <!-- CLOUD STORAGE & SYNC SCRIPT -->
     <script>
         // ===============================================================
-        // ⚙️ SUPABASE CONFIGURATION (Replace with your actual keys)
+        // ⚙️ SUPABASE CONFIGURATION
         // ===============================================================
         const SUPABASE_URL = "https://vaswszkooyxcqltejjyr.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_PZu-jMSkl24fRRAqZHoBXA_aZ-jZIkl";
-        const BUCKET_NAME = "Poke-con"; // Matches your Supabase bucket
+        const BUCKET_NAME = "Poke-con";
 
         // Initialize Supabase Client
-        let supabase = null;
-        if (SUPABASE_URL.includes("YOUR_SUPABASE_PROJECT_ID") === false) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabaseClient = null;
+        if (SUPABASE_URL.includes("YOUR_SUPABASE_PROJECT_ID") === false && window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        // Demo fallback data if API keys are not connected yet
+        // Demo fallback data
         const localFallbackBinders = [
             {
                 id: "1",
@@ -507,9 +507,9 @@
 
             let binderList = [];
 
-            if (supabase) {
+            if (supabaseClient) {
                 try {
-                    const { data, error } = await supabase.from('binders').select('*').order('created_at', { ascending: false });
+                    const { data, error } = await supabaseClient.from('binders').select('*').order('created_at', { ascending: false });
                     if (error) throw error;
                     binderList = data;
                 } catch (err) {
@@ -544,7 +544,7 @@
                         </div>
                         <div class="binder-footer">
                             <button class="like-btn" onclick="likeBinder('${binder.id}')">
-                                ❤️ <span>${binder.likes || 0}</span>
+                                ❤️ <span id="like-count-${binder.id}">${binder.likes || 0}</span>
                             </button>
                             <a href="${binder.image_url}" target="_blank" class="btn" style="padding: 6px 12px; font-size: 11px;">Zoom Photo 🔍</a>
                         </div>
@@ -553,9 +553,43 @@
             `).join('');
         }
 
-        // 2. HANDLE FILE UPLOAD TO SUPABASE BUCKET ('Poke-con')
+        // 2. LIKE BINDER FUNCTION
+        async function likeBinder(binderId) {
+            const countSpan = document.getElementById(`like-count-${binderId}`);
+            if (!countSpan) return;
+
+            let currentLikes = parseInt(countSpan.innerText) || 0;
+            let newLikes = currentLikes + 1;
+            countSpan.innerText = newLikes;
+
+            if (supabaseClient) {
+                try {
+                    await supabaseClient.from('binders').update({ likes: newLikes }).eq('id', binderId);
+                } catch (err) {
+                    console.error("Failed to update likes in database:", err);
+                }
+            } else {
+                const binders = getLocalBinders();
+                const binder = binders.find(b => b.id === binderId);
+                if (binder) {
+                    binder.likes = newLikes;
+                    localStorage.setItem('pokecon_showroom_binders', JSON.stringify(binders));
+                }
+            }
+        }
+
+        // 3. HANDLE FILE UPLOAD
         async function handleBinderUpload(e) {
             e.preventDefault();
+
+            const fileInput = document.getElementById("binderPhoto");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select an image file first.");
+                return;
+            }
+
             const submitBtn = document.getElementById("uploadBtn");
             submitBtn.disabled = true;
             submitBtn.innerText = "Uploading to Cloud...";
@@ -563,32 +597,25 @@
             const trainerName = document.getElementById("trainerName").value;
             const binderTitle = document.getElementById("binderTitle").value;
             const binderDesc = document.getElementById("binderDesc").value;
-            const fileInput = document.getElementById("binderPhoto");
-            const file = fileInput.files[0];
-
-            if (!file) return;
 
             try {
                 let publicImageUrl = "";
 
-                if (supabase) {
-                    // Upload file to Supabase bucket 'Poke-con'
+                if (supabaseClient) {
                     const fileName = `binder_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-                    const { data: uploadData, error: uploadError } = await supabase.storage
+                    const { uploadData, error: uploadError } = await supabaseClient.storage
                         .from(BUCKET_NAME)
                         .upload(fileName, file);
 
                     if (uploadError) throw uploadError;
 
-                    // Get public URL
-                    const { data: urlData } = supabase.storage
+                    const { data: urlData } = supabaseClient.storage
                         .from(BUCKET_NAME)
                         .getPublicUrl(fileName);
-                        
+
                     publicImageUrl = urlData.publicUrl;
 
-                    // Insert metadata into DB table 'binders'
-                    const { error: dbError } = await supabase.from('binders').insert([
+                    const { error: dbError } = await supabaseClient.from('binders').insert([
                         {
                             trainer_name: trainerName,
                             title: binderTitle,
@@ -601,7 +628,6 @@
                     if (dbError) throw dbError;
 
                 } else {
-                    // Fallback for local testing
                     publicImageUrl = await readFileAsDataURL(file);
                     const newBinder = {
                         id: Date.now().toString(),
@@ -627,7 +653,7 @@
             }
         }
 
-        // FALLBACK STORAGE HELPERS
+        // HELPERS
         function getLocalBinders() {
             const stored = localStorage.getItem('pokecon_showroom_binders');
             return stored ? JSON.parse(stored) : localFallbackBinders;
@@ -653,7 +679,6 @@
             ) : '';
         }
 
-        // MODAL CONTROLS
         function openUploadModal() {
             document.getElementById("uploadModal").style.display = "flex";
         }
@@ -665,4 +690,3 @@
     </script>
 </body>
 </html>
-
