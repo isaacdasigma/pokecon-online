@@ -1,227 +1,668 @@
-<script>
-    // ===============================================================
-    // ⚙️ SUPABASE CONFIGURATION
-    // ===============================================================
-    const SUPABASE_URL = "https://vaswszkooyxcqltejjyr.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_PZu-jMSkl24fRRAqZHoBXA_aZ-jZIkl";
-    const BUCKET_NAME = "Poke-con";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéCon Online | Binder Showroom</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SUPABASE JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    // Initialize Supabase Client (Renamed to avoid library name collisions)
-    let supabaseClient = null;
-    if (SUPABASE_URL.includes("YOUR_SUPABASE_PROJECT_ID") === false) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-
-    // Fallback data
-    const localFallbackBinders = [
-        {
-            id: "1",
-            trainer_name: "Ash_Master",
-            title: "1st Edition Shadowless Collection",
-            description: "Complete near-mint condition Base Set featuring Charizard, Blastoise, and Venusaur.",
-            image_url: "https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&w=800&q=80",
-            likes: 24
-        },
-        {
-            id: "2",
-            trainer_name: "Misty_Gym",
-            title: "Water-Type Master Binder",
-            description: "Every Water Pokémon holo card from Neo Genesis through Gold & Silver era.",
-            image_url: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80",
-            likes: 18
-        }
-    ];
-
-    document.addEventListener("DOMContentLoaded", () => {
-        loadShowroomBinders();
-    });
-
-    // 1. FETCH & DISPLAY BINDERS
-    async function loadShowroomBinders() {
-        const grid = document.getElementById("binderGrid");
-        grid.innerHTML = "<p>Loading cloud showroom photos...</p>";
-
-        let binderList = [];
-
-        if (supabaseClient) {
-            try {
-                const { data, error } = await supabaseClient.from('binders').select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                binderList = data;
-            } catch (err) {
-                console.warn("Supabase DB fetch error, using fallback.", err);
-                binderList = getLocalBinders();
-            }
-        } else {
-            document.getElementById('syncStatus').innerHTML = `⚠️ <strong>Demo Mode:</strong> Add your Supabase credentials to enable multi-device sync for bucket <code>${BUCKET_NAME}</code>.`;
-            binderList = getLocalBinders();
+    <style>
+        :root {
+            --poke-red: #e3350d;
+            --poke-blue: #2a75d3;
+            --poke-yellow: #ffcb05;
+            --bg-light: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --card-border: #e2e8f0;
+            --green-live: #10b981;
         }
 
-        renderGrid(binderList);
-    }
-
-    function renderGrid(binders) {
-        const grid = document.getElementById("binderGrid");
-        if (!binders || binders.length === 0) {
-            grid.innerHTML = "<p>No binders uploaded yet. Be the first trainer to share!</p>";
-            return;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        grid.innerHTML = binders.map(binder => `
-            <div class="binder-card">
-                <div class="binder-img-wrap">
-                    <span class="trainer-badge">👤 ${escapeHTML(binder.trainer_name)}</span>
-                    <img src="${binder.image_url}" alt="${escapeHTML(binder.title)}" loading="lazy">
-                </div>
-                <div class="binder-body">
-                    <div>
-                        <h4>${escapeHTML(binder.title)}</h4>
-                        <p>${escapeHTML(binder.description || "No description provided.")}</p>
-                    </div>
-                    <div class="binder-footer">
-                        <button class="like-btn" onclick="likeBinder('${binder.id}')">
-                            ❤️ <span id="like-count-${binder.id}">${binder.likes || 0}</span>
-                        </button>
-                        <a href="${binder.image_url}" target="_blank" class="btn" style="padding: 6px 12px; font-size: 11px;">Zoom Photo 🔍</a>
-                    </div>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--card-border);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 26px;
+        }
+
+        header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 22px;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        header h1 span {
+            color: var(--poke-red);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        nav a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.2s ease;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--poke-blue);
+        }
+
+        /* HERO HEADER */
+        .showroom-hero {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.88)), 
+                        url('https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .showroom-hero h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .showroom-hero p {
+            font-size: 16px;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin: 0 auto 24px;
+        }
+
+        /* UPLOAD CONTAINER */
+        .upload-section {
+            max-width: 1200px;
+            margin: -30px auto 30px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .upload-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .upload-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .upload-title h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-block;
+            background-color: var(--poke-yellow);
+            color: var(--text-dark);
+            padding: 12px 24px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        .btn-red {
+            background-color: var(--poke-red);
+            color: white;
+        }
+
+        .btn-blue {
+            background-color: var(--poke-blue);
+            color: white;
+        }
+
+        /* SHOWROOM GRID */
+        .showroom-container {
+            max-width: 1200px;
+            margin: 20px auto 60px;
+            padding: 0 20px;
+            flex-grow: 1;
+        }
+
+        .binder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 28px;
+        }
+
+        .binder-card {
+            background: white;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .binder-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .binder-img-wrap {
+            width: 100%;
+            height: 240px;
+            background: #0f172a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .binder-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .binder-card:hover .binder-img-wrap img {
+            transform: scale(1.05);
+        }
+
+        .trainer-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .binder-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .binder-body h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .binder-body p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .binder-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 12px;
+            margin-top: auto;
+        }
+
+        .like-btn {
+            background: #f8fafc;
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .like-btn:hover {
+            background: #f1f5f9;
+        }
+
+        /* UPLOAD MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        /* STATUS BANNER */
+        .sync-notice {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: var(--poke-blue);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 24px 20px;
+            font-size: 13px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-group">
+            <span class="logo-icon">⚡</span>
+            <h1>PokéCon <span>Online</span></h1>
+        </div>
+        <nav>
+            <a href="index.html">Main Lobby</a>
+            <a href="marketplace.html">Marketplace</a>
+            <a href="showroom.html" class="active">Showroom</a>
+            <a href="#">Battle Arena</a>
+        </nav>
+    </header>
+
+    <section class="showroom-hero">
+        <h2>📚 Trainer Binder Showroom</h2>
+        <p>Showcase your physical Pokémon card binders to collectors across the globe. Upload photos live from any desktop or mobile device.</p>
+    </section>
+
+    <div class="upload-section">
+        <div class="upload-card">
+            <div class="upload-title">
+                <span style="font-size: 28px;">📖</span>
+                <div>
+                    <h3>Have a binder to share?</h3>
+                    <p style="font-size: 13px; color: var(--text-muted);">Photos uploaded here are immediately stored in the cloud and synced live.</p>
                 </div>
             </div>
-        `).join('');
-    }
+            <button class="btn btn-red" onclick="openUploadModal()">+ Upload New Binder</button>
+        </div>
+    </div>
 
-    // 2. LIKE BINDER FUNCTION (ADDED)
-    async function likeBinder(binderId) {
-        const countSpan = document.getElementById(`like-count-${binderId}`);
-        if (!countSpan) return;
-
-        let currentLikes = parseInt(countSpan.innerText) || 0;
-        let newLikes = currentLikes + 1;
-        countSpan.innerText = newLikes;
-
-        if (supabaseClient) {
-            try {
-                await supabaseClient.from('binders').update({ likes: newLikes }).eq('id', binderId);
-            } catch (err) {
-                console.error("Failed to update likes in database:", err);
-            }
-        } else {
-            const binders = getLocalBinders();
-            const binder = binders.find(b => b.id === binderId);
-            if (binder) {
-                binder.likes = newLikes;
-                localStorage.setItem('pokecon_showroom_binders', JSON.stringify(binders));
-            }
-        }
-    }
-
-    // 3. HANDLE FILE UPLOAD TO SUPABASE BUCKET
-    async function handleBinderUpload(e) {
-        e.preventDefault();
-
-        const fileInput = document.getElementById("binderPhoto");
-        const file = fileInput.files[0];
+    <main class="showroom-container">
         
-        // Check for file BEFORE locking the submit button
-        if (!file) {
-            alert("Please select an image file first.");
-            return;
+        <div class="sync-notice" id="syncStatus">
+            ☁️ <strong>Cloud Storage Active:</strong> Binders loaded live from bucket <code>Poke-con</code>.
+        </div>
+
+        <div class="binder-grid" id="binderGrid">
+            <!-- Cards render dynamically via JavaScript -->
+        </div>
+
+    </main>
+
+    <!-- UPLOAD MODAL -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal">
+            <h3>Upload Card Binder</h3>
+            <form id="binderForm" onsubmit="handleBinderUpload(event)">
+                <div class="form-group">
+                    <label>Trainer Name</label>
+                    <input type="text" id="trainerName" placeholder="e.g. Red_Ketchum" required>
+                </div>
+                <div class="form-group">
+                    <label>Binder Title</label>
+                    <input type="text" id="binderTitle" placeholder="e.g. Vintage 1999 Base Set Holos" required>
+                </div>
+                <div class="form-group">
+                    <label>Select Binder Photo</label>
+                    <input type="file" id="binderPhoto" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label>Description / Notes</label>
+                    <textarea id="binderDesc" rows="3" placeholder="Tell collectors about your favorite cards in this binder..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" style="background:#e2e8f0;" onclick="closeUploadModal()">Cancel</button>
+                    <button type="submit" class="btn btn-blue" id="uploadBtn">Upload to Cloud ☁️</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 PokéCon Online Concept — Virtual TCG Convention System</p>
+    </footer>
+
+    <!-- CLOUD STORAGE & SYNC SCRIPT -->
+    <script>
+        // ===============================================================
+        // ⚙️ SUPABASE CONFIGURATION (Replace with your actual keys)
+        // ===============================================================
+        const SUPABASE_URL = "https://vaswszkooyxcqltejjyr.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_PZu-jMSkl24fRRAqZHoBXA_aZ-jZIkl";
+        const BUCKET_NAME = "Poke-con"; // Matches your Supabase bucket
+
+        // Initialize Supabase Client
+        let supabase = null;
+        if (SUPABASE_URL.includes("YOUR_SUPABASE_PROJECT_ID") === false) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        const submitBtn = document.getElementById("uploadBtn");
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Uploading to Cloud...";
+        // Demo fallback data if API keys are not connected yet
+        const localFallbackBinders = [
+            {
+                id: "1",
+                trainer_name: "Ash_Master",
+                title: "1st Edition Shadowless Collection",
+                description: "Complete near-mint condition Base Set featuring Charizard, Blastoise, and Venusaur.",
+                image_url: "https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&w=800&q=80",
+                likes: 24
+            },
+            {
+                id: "2",
+                trainer_name: "Misty_Gym",
+                title: "Water-Type Master Binder",
+                description: "Every Water Pokémon holo card from Neo Genesis through Gold & Silver era.",
+                image_url: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80",
+                likes: 18
+            }
+        ];
 
-        const trainerName = document.getElementById("trainerName").value;
-        const binderTitle = document.getElementById("binderTitle").value;
-        const binderDesc = document.getElementById("binderDesc").value;
+        document.addEventListener("DOMContentLoaded", () => {
+            loadShowroomBinders();
+        });
 
-        try {
-            let publicImageUrl = "";
+        // 1. FETCH & DISPLAY BINDERS
+        async function loadShowroomBinders() {
+            const grid = document.getElementById("binderGrid");
+            grid.innerHTML = "<p>Loading cloud showroom photos...</p>";
 
-            if (supabaseClient) {
-                const fileName = `binder_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-                const { uploadData, error: uploadError } = await supabaseClient.storage
-                    .from(BUCKET_NAME)
-                    .upload(fileName, file);
+            let binderList = [];
 
-                if (uploadError) throw uploadError;
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase.from('binders').select('*').order('created_at', { ascending: false });
+                    if (error) throw error;
+                    binderList = data;
+                } catch (err) {
+                    console.warn("Supabase DB fetch error, using fallback.", err);
+                    binderList = getLocalBinders();
+                }
+            } else {
+                document.getElementById('syncStatus').innerHTML = `⚠️ <strong>Demo Mode:</strong> Add your Supabase credentials to enable multi-device sync for bucket <code>${BUCKET_NAME}</code>.`;
+                binderList = getLocalBinders();
+            }
 
-                const { data: urlData } = supabaseClient.storage
-                    .from(BUCKET_NAME)
-                    .getPublicUrl(fileName);
-                    
-                publicImageUrl = urlData.publicUrl;
+            renderGrid(binderList);
+        }
 
-                const { error: dbError } = await supabaseClient.from('binders').insert([
-                    {
+        function renderGrid(binders) {
+            const grid = document.getElementById("binderGrid");
+            if (!binders || binders.length === 0) {
+                grid.innerHTML = "<p>No binders uploaded yet. Be the first trainer to share!</p>";
+                return;
+            }
+
+            grid.innerHTML = binders.map(binder => `
+                <div class="binder-card">
+                    <div class="binder-img-wrap">
+                        <span class="trainer-badge">👤 ${escapeHTML(binder.trainer_name)}</span>
+                        <img src="${binder.image_url}" alt="${escapeHTML(binder.title)}" loading="lazy">
+                    </div>
+                    <div class="binder-body">
+                        <div>
+                            <h4>${escapeHTML(binder.title)}</h4>
+                            <p>${escapeHTML(binder.description || "No description provided.")}</p>
+                        </div>
+                        <div class="binder-footer">
+                            <button class="like-btn" onclick="likeBinder('${binder.id}')">
+                                ❤️ <span>${binder.likes || 0}</span>
+                            </button>
+                            <a href="${binder.image_url}" target="_blank" class="btn" style="padding: 6px 12px; font-size: 11px;">Zoom Photo 🔍</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 2. HANDLE FILE UPLOAD TO SUPABASE BUCKET ('Poke-con')
+        async function handleBinderUpload(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById("uploadBtn");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Uploading to Cloud...";
+
+            const trainerName = document.getElementById("trainerName").value;
+            const binderTitle = document.getElementById("binderTitle").value;
+            const binderDesc = document.getElementById("binderDesc").value;
+            const fileInput = document.getElementById("binderPhoto");
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            try {
+                let publicImageUrl = "";
+
+                if (supabase) {
+                    // Upload file to Supabase bucket 'Poke-con'
+                    const fileName = `binder_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from(BUCKET_NAME)
+                        .upload(fileName, file);
+
+                    if (uploadError) throw uploadError;
+
+                    // Get public URL
+                    const { data: urlData } = supabase.storage
+                        .from(BUCKET_NAME)
+                        .getPublicUrl(fileName);
+                        
+                    publicImageUrl = urlData.publicUrl;
+
+                    // Insert metadata into DB table 'binders'
+                    const { error: dbError } = await supabase.from('binders').insert([
+                        {
+                            trainer_name: trainerName,
+                            title: binderTitle,
+                            description: binderDesc,
+                            image_url: publicImageUrl,
+                            likes: 0
+                        }
+                    ]);
+
+                    if (dbError) throw dbError;
+
+                } else {
+                    // Fallback for local testing
+                    publicImageUrl = await readFileAsDataURL(file);
+                    const newBinder = {
+                        id: Date.now().toString(),
                         trainer_name: trainerName,
                         title: binderTitle,
                         description: binderDesc,
                         image_url: publicImageUrl,
                         likes: 0
-                    }
-                ]);
+                    };
+                    saveLocalBinder(newBinder);
+                }
 
-                if (dbError) throw dbError;
+                closeUploadModal();
+                loadShowroomBinders();
+                alert("🎉 Success! Your binder photo has been published to the Poke-con bucket!");
 
-            } else {
-                publicImageUrl = await readFileAsDataURL(file);
-                const newBinder = {
-                    id: Date.now().toString(),
-                    trainer_name: trainerName,
-                    title: binderTitle,
-                    description: binderDesc,
-                    image_url: publicImageUrl,
-                    likes: 0
-                };
-                saveLocalBinder(newBinder);
+            } catch (error) {
+                console.error("Upload failed:", error);
+                alert("Upload failed: " + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Upload to Cloud ☁️";
             }
-
-            closeUploadModal();
-            loadShowroomBinders();
-            alert("🎉 Success! Your binder photo has been published to the Poke-con bucket!");
-
-        } catch (error) {
-            console.error("Upload failed:", error);
-            alert("Upload failed: " + error.message);
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerText = "Upload to Cloud ☁️";
         }
-    }
 
-    // HELPERS
-    function getLocalBinders() {
-        const stored = localStorage.getItem('pokecon_showroom_binders');
-        return stored ? JSON.parse(stored) : localFallbackBinders;
-    }
+        // FALLBACK STORAGE HELPERS
+        function getLocalBinders() {
+            const stored = localStorage.getItem('pokecon_showroom_binders');
+            return stored ? JSON.parse(stored) : localFallbackBinders;
+        }
 
-    function saveLocalBinder(binder) {
-        const current = getLocalBinders();
-        current.unshift(binder);
-        localStorage.setItem('pokecon_showroom_binders', JSON.stringify(current));
-    }
+        function saveLocalBinder(binder) {
+            const current = getLocalBinders();
+            current.unshift(binder);
+            localStorage.setItem('pokecon_showroom_binders', JSON.stringify(current));
+        }
 
-    function readFileAsDataURL(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.readAsDataURL(file);
-        });
-    }
+        function readFileAsDataURL(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
 
-    function escapeHTML(str) {
-        return str ? str.replace(/[&<>'"]/g, 
-            tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-        ) : '';
-    }
+        function escapeHTML(str) {
+            return str ? str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            ) : '';
+        }
 
-    function openUploadModal() {
-        document.getElementById("uploadModal").style.display = "flex";
-    }
+        // MODAL CONTROLS
+        function openUploadModal() {
+            document.getElementById("uploadModal").style.display = "flex";
+        }
 
-    function closeUploadModal() {
-        document.getElementById("uploadModal").style.display = "none";
-        document.getElementById("binderForm").reset();
-    }
-</script>
+        function closeUploadModal() {
+            document.getElementById("uploadModal").style.display = "none";
+            document.getElementById("binderForm").reset();
+        }
+    </script>
+</body>
+</html>
+
