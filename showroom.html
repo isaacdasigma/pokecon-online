@@ -3,561 +3,664 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokéCon Online | Card Showroom</title>
+    <title>PokéCon Online | Binder Showroom</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gill+Sans+MT:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- SUPABASE JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
-        body {
-            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+        :root {
+            --poke-red: #e3350d;
+            --poke-blue: #2a75d3;
+            --poke-yellow: #ffcb05;
+            --bg-light: #f8fafc;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --card-border: #e2e8f0;
+            --green-live: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f9;
-            color: #222222;
-            padding-bottom: 80px;
         }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
         header {
-            background-color: #2a75d3;
-            color: white;
-            padding: 20px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--card-border);
+            padding: 16px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
         }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 26px;
+        }
+
         header h1 {
             font-family: 'Montserrat', sans-serif;
             font-weight: 800;
-            margin: 0;
-            font-size: 24px;
+            font-size: 22px;
+            color: var(--text-dark);
             text-transform: uppercase;
+            letter-spacing: -0.5px;
         }
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 15px;
-            font-weight: bold;
-            font-size: 14px;
-            text-transform: uppercase;
+
+        header h1 span {
+            color: var(--poke-red);
         }
-        .hero-banner {
-            background: linear-gradient(135deg, #e3350d 0%, #b32400 100%);
-            color: white;
-            text-align: center;
-            padding: 40px 20px;
-            border-bottom: 5px solid #ffcb05;
-        }
-        .hero-banner h2 {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 28px;
-            margin: 0 0 10px 0;
-            text-transform: uppercase;
-        }
-        .hero-banner p {
-            font-size: 16px;
-            max-width: 650px;
-            margin: 0 auto;
-            color: #ffd2c7;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        /* Controls & Action Section */
-        .controls-bar {
+
+        nav {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            background: white;
-            padding: 18px 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            gap: 24px;
         }
-        .search-box {
-            flex: 1;
-            min-width: 220px;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ccc;
-            border-radius: 6px;
+
+        nav a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 600;
             font-size: 14px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-        .filter-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .filter-btn {
-            background: #e9e9f0;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
             text-transform: uppercase;
-            transition: 0.2s;
+            letter-spacing: 0.5px;
+            transition: color 0.2s ease;
         }
-        .filter-btn:hover, .filter-btn.active {
-            background: #e3350d;
+
+        nav a:hover, nav a.active {
+            color: var(--poke-blue);
+        }
+
+        /* HERO HEADER */
+        .showroom-hero {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.88)), 
+                        url('https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .showroom-hero h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .showroom-hero p {
+            font-size: 16px;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin: 0 auto 24px;
+        }
+
+        /* UPLOAD CONTAINER */
+        .upload-section {
+            max-width: 1200px;
+            margin: -30px auto 30px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .upload-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .upload-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .upload-title h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-block;
+            background-color: var(--poke-yellow);
+            color: var(--text-dark);
+            padding: 12px 24px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        .btn-red {
+            background-color: var(--poke-red);
             color: white;
         }
-        .submit-trigger-btn {
-            background-color: #ffcb05;
-            color: #222;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 800;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-size: 13px;
-            box-shadow: 0 3px 0 #d1a600;
-            transition: transform 0.1s, background 0.2s;
+
+        .btn-blue {
+            background-color: var(--poke-blue);
+            color: white;
         }
-        .submit-trigger-btn:hover {
-            background-color: #f0be00;
-            transform: translateY(-2px);
+
+        /* SHOWROOM GRID */
+        .showroom-container {
+            max-width: 1200px;
+            margin: 20px auto 60px;
+            padding: 0 20px;
+            flex-grow: 1;
         }
-        /* Showroom Card Grid */
-        .showroom-grid {
+
+        .binder-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 28px;
         }
-        .showcase-card {
+
+        .binder-card {
             background: white;
-            border: 3px solid #e0e0e0;
-            border-radius: 14px;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
             overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-            transition: transform 0.2s, border-color 0.2s;
         }
-        .showcase-card:hover {
-            transform: translateY(-5px);
-            border-color: #e3350d;
+
+        .binder-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 25px -5px rgba(0, 0, 0, 0.1);
         }
-        .card-img-container {
+
+        .binder-img-wrap {
             width: 100%;
-            height: 260px;
-            background-color: #1a1a24;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+            height: 240px;
+            background: #0f172a;
             position: relative;
+            overflow: hidden;
         }
-        .card-img-container img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            transition: transform 0.3s;
+
+        .binder-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
         }
-        .showcase-card:hover .card-img-container img {
+
+        .binder-card:hover .binder-img-wrap img {
             transform: scale(1.05);
         }
-        .tag-badge {
+
+        .trainer-badge {
             position: absolute;
             top: 12px;
-            right: 12px;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-            padding: 4px 10px;
+            left: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            color: white;
+            padding: 4px 12px;
             border-radius: 20px;
-            background-color: #ffcb05;
-            color: #222;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
         }
-        .card-body {
-            padding: 18px;
+
+        .binder-body {
+            padding: 20px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
             justify-content: space-between;
         }
-        .card-title {
+
+        .binder-body h4 {
             font-family: 'Montserrat', sans-serif;
             font-size: 18px;
-            margin: 0 0 4px 0;
-            color: #222;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            text-transform: uppercase;
         }
-        .trainer-byline {
+
+        .binder-body p {
             font-size: 13px;
-            color: #2a75d3;
-            font-weight: bold;
-            margin-bottom: 10px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 16px;
         }
-        .card-story {
-            font-size: 13px;
-            color: #555;
-            line-height: 1.4;
-            margin-bottom: 15px;
-            background: #f8f8fc;
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 3px solid #2a75d3;
-        }
-        .card-footer-action {
+
+        .binder-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #f1f5f9;
             padding-top: 12px;
+            margin-top: auto;
         }
-        .flex-btn {
-            background-color: #f0f4f8;
-            border: 2px solid #2a75d3;
-            color: #2a75d3;
-            font-weight: bold;
-            font-size: 13px;
-            padding: 8px 14px;
-            border-radius: 8px;
+
+        .like-btn {
+            background: #f8fafc;
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: 0.2s;
+            transition: background 0.2s;
         }
-        .flex-btn:hover {
-            background-color: #2a75d3;
-            color: white;
+
+        .like-btn:hover {
+            background: #f1f5f9;
         }
-        /* Modal Form */
+
+        /* UPLOAD MODAL */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: flex;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
             justify-content: center;
             align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 999;
+            z-index: 1000;
+            padding: 20px;
         }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .modal-content {
+
+        .modal {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 440px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border: 4px solid #e3350d;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
-        .modal-content h3 {
+
+        .modal h3 {
             font-family: 'Montserrat', sans-serif;
-            margin-top: 0;
-            color: #e3350d;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 20px;
             text-transform: uppercase;
         }
+
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
+
         .form-group label {
             display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 13px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-dark);
+            margin-bottom: 6px;
         }
-        .form-group input, .form-group select, .form-group textarea {
+
+        .form-group input, .form-group textarea {
             width: 100%;
-            padding: 9px;
-            border: 2px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
+            padding: 10px 14px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 14px;
         }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        /* STATUS BANNER */
+        .sync-notice {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: var(--poke-blue);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         footer {
-            background-color: #333;
-            color: white;
+            background-color: #0f172a;
+            color: #94a3b8;
             text-align: center;
-            padding: 15px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            padding: 24px 20px;
+            font-size: 13px;
+            margin-top: auto;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🏆 PokéCon Showroom</h1>
+        <div class="logo-group">
+            <span class="logo-icon">⚡</span>
+            <h1>PokéCon <span>Online</span></h1>
+        </div>
         <nav>
-            <a href="index.html">🎪 Floor Plan</a>
-            <a href="market.html">🛒 Deals Hub</a>
+            <a href="index.html">Main Lobby</a>
+            <a href="marketplace.html">Marketplace</a>
+            <a href="showroom.html" class="active">Showroom</a>
+            <a href="#">Battle Arena</a>
         </nav>
     </header>
 
-    <div class="hero-banner">
-        <h2>🔥 The Ultimate Grail Card Gallery</h2>
-        <p>Show off your prized pulls, rare slabs, vintage holographic cards, or favorite custom artworks with the rest of PokéCon!</p>
+    <section class="showroom-hero">
+        <h2>📚 Trainer Binder Showroom</h2>
+        <p>Showcase your physical Pokémon card binders to collectors across the globe. Upload photos live from any desktop or mobile device.</p>
+    </section>
+
+    <div class="upload-section">
+        <div class="upload-card">
+            <div class="upload-title">
+                <span style="font-size: 28px;">📖</span>
+                <div>
+                    <h3>Have a binder to share?</h3>
+                    <p style="font-size: 13px; color: var(--text-muted);">Photos uploaded here are immediately stored in the cloud and synced live.</p>
+                </div>
+            </div>
+            <button class="btn btn-red" onclick="openUploadModal()">+ Upload New Binder</button>
+        </div>
     </div>
 
-    <div class="container">
-
-        <!-- Controls: Search, Filters & Post Button -->
-        <div class="controls-bar">
-            <button class="submit-trigger-btn" onclick="openShowroomModal()">📸 Flex Your Card</button>
-            
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 Search card name or trainer..." onkeyup="filterShowcase()">
-            </div>
-
-            <div class="filter-buttons">
-                <button class="filter-btn active" onclick="setCategory('all', this)">All Cards</button>
-                <button class="filter-btn" onclick="setCategory('graded', this)">Slabs / Graded</button>
-                <button class="filter-btn" onclick="setCategory('vintage', this)">Vintage 1999</button>
-                <button class="filter-btn" onclick="setCategory('altart', this)">Alt Art / Secret</button>
-            </div>
+    <main class="showroom-container">
+        
+        <div class="sync-notice" id="syncStatus">
+            ☁️ <strong>Cloud Storage Active:</strong> Binders loaded live from bucket <code>Poke-con</code>.
         </div>
 
-        <!-- Showroom Cards Display Grid -->
-        <div class="showroom-grid" id="showroomGrid">
-            <!-- Cards render here dynamically -->
+        <div class="binder-grid" id="binderGrid">
+            <!-- Cards render dynamically via JavaScript -->
         </div>
 
-    </div>
+    </main>
 
-    <!-- SHOWROOM SUBMISSION MODAL -->
-    <div class="modal-overlay" id="showroomModal">
-        <div class="modal-content">
-            <h3>🏆 Submit to Hall of Fame</h3>
-            <div class="form-group">
-                <label for="cardTitle">Card Name</label>
-                <input type="text" id="cardTitle" placeholder="e.g., Charizard Gold Star #100">
-            </div>
-            <div class="form-group">
-                <label for="trainerName">Trainer / Collector Name</label>
-                <input type="text" id="trainerName" placeholder="e.g., Red_Master">
-            </div>
-            <div class="form-group">
-                <label for="rarityCategory">Category Tag</label>
-                <select id="rarityCategory">
-                    <option value="graded">💎 PSA / BGS Graded Slab</option>
-                    <option value="vintage">🦖 Vintage (1999-2003)</option>
-                    <option value="altart">✨ Alt Art / Secret Rare</option>
-                    <option value="shiny">🔥 Full Art / Shiny</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="cardStory">Card Story or Pull Note</label>
-                <textarea id="cardStory" rows="2" placeholder="e.g., Pulled from my very first pack back in 2021!"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="cardImage">📸 Upload Card Photo</label>
-                <input type="file" id="cardImage" accept="image/*">
-            </div>
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <button style="width:50%; background:#2a75d3; color:white; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="closeShowroomModal()">Cancel</button>
-                <button style="width:50%; background:#e3350d; color:white; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="submitShowroomCard()">Post Card</button>
-            </div>
+    <!-- UPLOAD MODAL -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal">
+            <h3>Upload Card Binder</h3>
+            <form id="binderForm" onsubmit="handleBinderUpload(event)">
+                <div class="form-group">
+                    <label>Trainer Name</label>
+                    <input type="text" id="trainerName" placeholder="e.g. Red_Ketchum" required>
+                </div>
+                <div class="form-group">
+                    <label>Binder Title</label>
+                    <input type="text" id="binderTitle" placeholder="e.g. Vintage 1999 Base Set Holos" required>
+                </div>
+                <div class="form-group">
+                    <label>Select Binder Photo</label>
+                    <input type="file" id="binderPhoto" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label>Description / Notes</label>
+                    <textarea id="binderDesc" rows="3" placeholder="Tell collectors about your favorite cards in this binder..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" style="background:#e2e8f0;" onclick="closeUploadModal()">Cancel</button>
+                    <button type="submit" class="btn btn-blue" id="uploadBtn">Upload to Cloud ☁️</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <footer>
-        <p>&copy; 2026 PokéCon Online Concept</p>
+        <p>&copy; 2026 PokéCon Online Concept — Virtual TCG Convention System</p>
     </footer>
 
+    <!-- CLOUD STORAGE & SYNC SCRIPT -->
     <script>
-        // ⚠️ PASTE YOUR NPOINT.IO BIN URL HERE (Use a new Bin or the same Bin URL from index.html!)
-        const SHOWROOM_BIN_URL = "https://api.npoint.io/YOUR_NPOINT_BIN_URL";
+        // ===============================================================
+        // ⚙️ SUPABASE CONFIGURATION (Replace with your actual keys)
+        // ===============================================================
+        const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_ID.supabase.co";
+        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+        const BUCKET_NAME = "Poke-con"; // Matches your Supabase bucket
 
-        let showroomData = [];
-        let currentFilter = 'all';
+        // Initialize Supabase Client
+        let supabase = null;
+        if (SUPABASE_URL.includes("YOUR_SUPABASE_PROJECT_ID") === false) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // Demo fallback data if API keys are not connected yet
+        const localFallbackBinders = [
+            {
+                id: "1",
+                trainer_name: "Ash_Master",
+                title: "1st Edition Shadowless Collection",
+                description: "Complete near-mint condition Base Set featuring Charizard, Blastoise, and Venusaur.",
+                image_url: "https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&w=800&q=80",
+                likes: 24
+            },
+            {
+                id: "2",
+                trainer_name: "Misty_Gym",
+                title: "Water-Type Master Binder",
+                description: "Every Water Pokémon holo card from Neo Genesis through Gold & Silver era.",
+                image_url: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80",
+                likes: 18
+            }
+        ];
 
         document.addEventListener("DOMContentLoaded", () => {
-            fetchShowroomData();
-            // Refresh grid every 4 seconds to catch new posts live across Chromebooks
-            setInterval(fetchShowroomData, 4000);
+            loadShowroomBinders();
         });
 
-        async function fetchShowroomData() {
-            try {
-                const response = await fetch(SHOWROOM_BIN_URL);
-                if (!response.ok) return;
-                const result = await response.json();
-                
-                // If storing inside an object key or standard array
-                showroomData = Array.isArray(result.showroom) ? result.showroom : (result.showroom || []);
-                renderShowroomGrid();
-            } catch(e) {
-                console.error("Showroom fetch error:", e);
+        // 1. FETCH & DISPLAY BINDERS
+        async function loadShowroomBinders() {
+            const grid = document.getElementById("binderGrid");
+            grid.innerHTML = "<p>Loading cloud showroom photos...</p>";
+
+            let binderList = [];
+
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase.from('binders').select('*').order('created_at', { ascending: false });
+                    if (error) throw error;
+                    binderList = data;
+                } catch (err) {
+                    console.warn("Supabase DB fetch error, using fallback.", err);
+                    binderList = getLocalBinders();
+                }
+            } else {
+                document.getElementById('syncStatus').innerHTML = `⚠️ <strong>Demo Mode:</strong> Add your Supabase credentials to enable multi-device sync for bucket <code>${BUCKET_NAME}</code>.`;
+                binderList = getLocalBinders();
             }
+
+            renderGrid(binderList);
         }
 
-        async function saveShowroomData() {
-            try {
-                await fetch(SHOWROOM_BIN_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ showroom: showroomData })
-                });
-                renderShowroomGrid();
-            } catch(e) {
-                console.error("Showroom save error:", e);
-            }
-        }
-
-        function renderShowroomGrid() {
-            const grid = document.getElementById('showroomGrid');
-            const searchVal = document.getElementById('searchInput').value.toLowerCase();
-            grid.innerHTML = '';
-
-            if (showroomData.length === 0) {
-                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; background: white; border-radius: 12px; color: #888;">
-                    <h3>No cards showcased yet!</h3>
-                    <p>Be the first to click "📸 Flex Your Card" above and add your favourite pull!</p>
-                </div>`;
+        function renderGrid(binders) {
+            const grid = document.getElementById("binderGrid");
+            if (!binders || binders.length === 0) {
+                grid.innerHTML = "<p>No binders uploaded yet. Be the first trainer to share!</p>";
                 return;
             }
 
-            showroomData.forEach((item, index) => {
-                const matchesCategory = (currentFilter === 'all') || item.category === currentFilter;
-                const matchesSearch = item.title.toLowerCase().includes(searchVal) || item.trainer.toLowerCase().includes(searchVal);
-
-                if (matchesCategory && matchesSearch) {
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'showcase-card';
-
-                    const imageHtml = item.image 
-                        ? `<img src="${item.image}" alt="${item.title}">` 
-                        : `<p style="color:#aaa; font-size:12px;">No Image Uploaded</p>`;
-
-                    cardElement.innerHTML = `
-                        <div class="card-img-container">
-                            <span class="tag-badge">${getCategoryTagLabel(item.category)}</span>
-                            ${imageHtml}
+            grid.innerHTML = binders.map(binder => `
+                <div class="binder-card">
+                    <div class="binder-img-wrap">
+                        <span class="trainer-badge">👤 ${escapeHTML(binder.trainer_name)}</span>
+                        <img src="${binder.image_url}" alt="${escapeHTML(binder.title)}" loading="lazy">
+                    </div>
+                    <div class="binder-body">
+                        <div>
+                            <h4>${escapeHTML(binder.title)}</h4>
+                            <p>${escapeHTML(binder.description || "No description provided.")}</p>
                         </div>
-                        <div class="card-body">
-                            <div>
-                                <h3 class="card-title">${item.title}</h3>
-                                <div class="trainer-byline">Owner: ${item.trainer}</div>
-                                <div class="card-story">"${item.story}"</div>
-                            </div>
-                            <div class="card-footer-action">
-                                <button class="flex-btn" onclick="upvoteCard(${index})">
-                                    🔥 Flex <span style="background:#2a75d3; color:white; padding:2px 6px; border-radius:10px; font-size:11px;">${item.flexes || 0}</span>
-                                </button>
-                                <span style="font-size:11px; color:#aaa;">ID #${index + 101}</span>
-                            </div>
+                        <div class="binder-footer">
+                            <button class="like-btn" onclick="likeBinder('${binder.id}')">
+                                ❤️ <span>${binder.likes || 0}</span>
+                            </button>
+                            <a href="${binder.image_url}" target="_blank" class="btn" style="padding: 6px 12px; font-size: 11px;">Zoom Photo 🔍</a>
                         </div>
-                    `;
-                    grid.appendChild(cardElement);
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 2. HANDLE FILE UPLOAD TO SUPABASE BUCKET ('Poke-con')
+        async function handleBinderUpload(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById("uploadBtn");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Uploading to Cloud...";
+
+            const trainerName = document.getElementById("trainerName").value;
+            const binderTitle = document.getElementById("binderTitle").value;
+            const binderDesc = document.getElementById("binderDesc").value;
+            const fileInput = document.getElementById("binderPhoto");
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            try {
+                let publicImageUrl = "";
+
+                if (supabase) {
+                    // Upload file to Supabase bucket 'Poke-con'
+                    const fileName = `binder_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from(BUCKET_NAME)
+                        .upload(fileName, file);
+
+                    if (uploadError) throw uploadError;
+
+                    // Get public URL
+                    const { data: urlData } = supabase.storage
+                        .from(BUCKET_NAME)
+                        .getPublicUrl(fileName);
+                        
+                    publicImageUrl = urlData.publicUrl;
+
+                    // Insert metadata into DB table 'binders'
+                    const { error: dbError } = await supabase.from('binders').insert([
+                        {
+                            trainer_name: trainerName,
+                            title: binderTitle,
+                            description: binderDesc,
+                            image_url: publicImageUrl,
+                            likes: 0
+                        }
+                    ]);
+
+                    if (dbError) throw dbError;
+
+                } else {
+                    // Fallback for local testing
+                    publicImageUrl = await readFileAsDataURL(file);
+                    const newBinder = {
+                        id: Date.now().toString(),
+                        trainer_name: trainerName,
+                        title: binderTitle,
+                        description: binderDesc,
+                        image_url: publicImageUrl,
+                        likes: 0
+                    };
+                    saveLocalBinder(newBinder);
                 }
+
+                closeUploadModal();
+                loadShowroomBinders();
+                alert("🎉 Success! Your binder photo has been published to the Poke-con bucket!");
+
+            } catch (error) {
+                console.error("Upload failed:", error);
+                alert("Upload failed: " + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Upload to Cloud ☁️";
+            }
+        }
+
+        // FALLBACK STORAGE HELPERS
+        function getLocalBinders() {
+            const stored = localStorage.getItem('pokecon_showroom_binders');
+            return stored ? JSON.parse(stored) : localFallbackBinders;
+        }
+
+        function saveLocalBinder(binder) {
+            const current = getLocalBinders();
+            current.unshift(binder);
+            localStorage.setItem('pokecon_showroom_binders', JSON.stringify(current));
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
             });
         }
 
-        function getCategoryTagLabel(cat) {
-            switch(cat) {
-                case 'graded': return '💎 PSA / BGS';
-                case 'vintage': return '🦖 Vintage';
-                case 'altart': return '✨ Alt Art';
-                case 'shiny': return '🔥 Full Art';
-                default: return '⭐ Showcase';
-            }
+        function escapeHTML(str) {
+            return str ? str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            ) : '';
         }
 
-        function openShowroomModal() {
-            document.getElementById('showroomModal').classList.add('active');
+        // MODAL CONTROLS
+        function openUploadModal() {
+            document.getElementById("uploadModal").style.display = "flex";
         }
 
-        function closeShowroomModal() {
-            document.getElementById('showroomModal').classList.remove('active');
-        }
-
-        function submitShowroomCard() {
-            const title = document.getElementById('cardTitle').value.trim() || "Mystery Card";
-            const trainer = document.getElementById('trainerName').value.trim() || "Anonymous Trainer";
-            const category = document.getElementById('rarityCategory').value;
-            const story = document.getElementById('cardStory').value.trim() || "Proud member of my collection!";
-            const fileInput = document.getElementById('cardImage');
-
-            const saveEntry = (imageBase64 = null) => {
-                const newEntry = {
-                    title: title,
-                    trainer: trainer,
-                    category: category,
-                    story: story,
-                    image: imageBase64,
-                    flexes: 0,
-                    timestamp: new Date().getTime()
-                };
-
-                showroomData.unshift(newEntry); // Add to beginning of array
-                saveShowroomData();
-
-                // Clear Form
-                document.getElementById('cardTitle').value = '';
-                document.getElementById('trainerName').value = '';
-                document.getElementById('cardStory').value = '';
-                fileInput.value = '';
-                closeShowroomModal();
-            };
-
-            // Image Compression function to keep npoint payload lightweight
-            if (fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 450;
-                        const scaleSize = MAX_WIDTH / img.width;
-                        canvas.width = MAX_WIDTH;
-                        canvas.height = img.height * scaleSize;
-
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                        saveEntry(compressedBase64);
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                saveEntry();
-            }
-        }
-
-        function upvoteCard(index) {
-            if (showroomData[index]) {
-                showroomData[index].flexes = (showroomData[index].flexes || 0) + 1;
-                saveShowroomData();
-            }
-        }
-
-        function setCategory(category, element) {
-            currentFilter = category;
-            const buttons = document.querySelectorAll('.filter-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            element.classList.add('active');
-            renderShowroomGrid();
-        }
-
-        function filterShowcase() {
-            renderShowroomGrid();
+        function closeUploadModal() {
+            document.getElementById("uploadModal").style.display = "none";
+            document.getElementById("binderForm").reset();
         }
     </script>
 </body>
